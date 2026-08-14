@@ -1,4 +1,4 @@
-# dsh-gui-customization — DeepSeek Harness 插件工坊
+# dsh-gui-customization — DeepSeek Harness 时装工坊
 
 中文 | [English](README.en.md)
 

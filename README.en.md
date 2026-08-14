@@ -1,4 +1,4 @@
-# dsh-gui-customization — DeepSeek Harness Plugin Workshop
+# dsh-gui-customization — DeepSeek Harness Fashion Workshop
 
 [中文](README.md) | English
 
