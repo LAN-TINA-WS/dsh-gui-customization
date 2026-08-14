@@ -2,6 +2,8 @@
 
 [中文](README.md) | English
 
+![GUICustomization — Interface Settings](docs/screenshots/gui-customization.png)
+
 ## dsh-gui-customization
 
 A **theme customization plugin** for the DeepSeek Harness Web UI: default Nous Blue palette (light/dark), four presets and 13 custom colors, ambient glow (halo/breathing/position, live), background image (native file picker + built-in preset "DeepSeek Girl 01"), bilingual Chinese/English UI, persistent settings that survive restarts. Config entry: Settings → Interface Settings.
@@ -13,8 +15,6 @@ A plugin development project on top of [DeepSeek Harness](https://github.com/dee
 ## Featured: GUICustomization
 
 A theme plugin that lets users customize the DSH interface — a default "Nous Blue" palette, ambient glow, and background image, all configurable under Settings → Interface Settings, with persistent settings that survive restarts.
-
-![GUICustomization — Interface Settings](docs/screenshots/gui-customization.png)
 
 | Capability | Notes |
 | --- | --- |
