@@ -792,6 +792,36 @@ export function apply(ctx: Ctx) {
     )
   }
 
+  // ---- 设置导航图标增强（插件框架内手术式方案：失效静默降级为齿轮）----
+  const NAV_ICON_SVG = '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M8 1.8a6.2 6.2 0 1 0 .15 12.4c1.05 0 1.65-.52 1.65-1.24 0-.5-.3-.92-.8-1.18-.5-.28-.82-.6-.82-1.13 0-.9.9-1.35 1.95-1.35 2.05 0 3.72-1.5 3.72-3.72C13.85 3.55 11.3 1.8 8 1.8z"/><circle cx="5.4" cy="5.4" r="1.05" fill="currentColor" stroke="none"/><circle cx="10.6" cy="5.4" r="1.05" fill="currentColor" stroke="none"/><circle cx="3.7" cy="9.6" r="1.05" fill="currentColor" stroke="none"/></svg>'
+
+  function enhanceNavIcon() {
+    // 已应用且标记仍在（产品未重渲染）→ 跳过
+    if (document.querySelector('[data-guic-nav-icon="1"]') !== null) return
+    const dialog = document.querySelector('[role="dialog"]')
+    if (dialog === null) return
+    const labels = [DICT_ZH['nav.label'], DICT_EN['nav.label']]
+    const buttons = Array.from(dialog.querySelectorAll('button'))
+    for (const btn of buttons) {
+      const text = (btn.textContent ?? '').trim()
+      if (!labels.includes(text)) continue
+      const svg = btn.querySelector('svg')
+      if (svg === null) continue
+      const wrap = document.createElement('span')
+      wrap.innerHTML = NAV_ICON_SVG
+      const iconEl = wrap.firstElementChild
+      if (iconEl === null) continue
+      iconEl.setAttribute('data-guic-nav-icon', '1')
+      svg.replaceWith(iconEl)
+      return
+    }
+  }
+
+  const navObserver = new MutationObserver(() => { enhanceNavIcon() })
+  navObserver.observe(document.body, { childList: true, subtree: true })
+  enhanceNavIcon()
+  ctx.effect(() => () => { navObserver.disconnect() })
+
   // ---- 槽位注册 ----
   slots.inject('settings.section', () => slots.register(
     { name: 'settings.section', id: 'gui-customization', order: 5, label: () => t('nav.label') },
