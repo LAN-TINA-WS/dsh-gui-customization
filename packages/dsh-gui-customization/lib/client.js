@@ -826,14 +826,17 @@ window.__ModuleLoader__.load({
 					setAmbient(patch);
 					persist();
 				};
+				let fileSeq = 0;
 				const handleFile = (file) => {
 					userTouched = true;
+					const seq = ++fileSeq;
 					const reader = new FileReader();
 					reader.onload = () => {
+						if (seq !== fileSeq) return;
 						const dataUrl = String(reader.result);
 						const m = /^data:([a-z0-9.+-]+\/[a-z0-9.+-]+);base64,(.*)$/.exec(dataUrl);
 						if (m === null) {
-							setNotice(t("notice.bgReadError"));
+							setNotice(t("notice.bgReadError") + "（格式解析失败）");
 							return;
 						}
 						const bgData = {
@@ -845,15 +848,24 @@ window.__ModuleLoader__.load({
 						persist();
 						setNotice(t("notice.bgApplied"));
 					};
-					reader.onerror = () => setNotice(t("notice.bgReadError"));
-					reader.readAsDataURL(file);
+					reader.onerror = () => {
+						if (seq !== fileSeq) return;
+						const detail = reader.error !== null && reader.error.message !== void 0 ? String(reader.error.message) : "";
+						setNotice(t("notice.bgReadError") + (detail !== "" ? "：" + detail : ""));
+					};
+					try {
+						reader.readAsDataURL(file);
+					} catch (error) {
+						if (seq === fileSeq) setNotice(t("notice.bgReadError") + "：" + String(error));
+					}
 				};
 				const handleVideoFile = (file) => {
 					userTouched = true;
+					const seq = ++fileSeq;
 					applyVideoData(file);
 					saveVideo(file);
 					persist();
-					setNotice(t("notice.videoApplied"));
+					if (seq === fileSeq) setNotice(t("notice.videoApplied"));
 				};
 				const choosePreset = (key) => () => {
 					userTouched = true;
