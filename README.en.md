@@ -4,7 +4,7 @@
 
 ## dsh-gui-customization
 
-A **theme customization plugin** for the DeepSeek Harness Web UI: default Nous Blue palette (light/dark), four presets and 13 custom colors, ambient glow (halo/breathing/position, live), background image (native file picker + built-in preset "DeepSeek Girl 01"), bilingual Chinese/English UI, persistent settings that survive restarts. Config entry: Settings → Interface Settings.
+A **theme customization plugin** for the DeepSeek Harness Web UI: default Nous Blue palette (light/dark), four presets and 13 custom colors, ambient glow (halo/breathing/position, live), dynamic backgrounds (image/video via native file picker + built-in preset "DeepSeek Girl 01" + sidebar transparency toggle), palette import/export, bilingual Chinese/English UI, persistent settings that survive restarts. Config entry: Settings → Interface Settings.
 
 > [Latest Release](https://github.com/LAN-TINA-WS/dsh-gui-customization/releases/latest) ·  [dsh-plugin ecosystem](https://github.com/topics/dsh-plugin) · Install: `dsh plugin --profile web add link:<dir>` (see "Quick Start → Release track")
 
@@ -20,7 +20,8 @@ A theme plugin that lets users customize the DSH interface — a default "Nous B
 | --- | --- |
 | Palette | Default Nous Blue theme (light/dark) + System default / Nous Blue / Indigo / Emerald presets + 13 custom colors |
 | Ambient glow | Corner halos that follow the theme's primary color; strength, breathing depth and position (5 modes) adjustable live |
-| Background image | Native file picker; conversation area shows the image with a light/dark-adaptive scrim; data kept in IndexedDB |
+| Dynamic background | Image (native picker + preset "DeepSeek Girl 01") and video (muted loop) modes, mutually exclusive; conversation area shows through with a light/dark-adaptive scrim; sidebar transparency toggle; IndexedDB persistence |
+| Import / export | One-click palette JSON export (clipboard copy) and paste-to-apply import |
 | Bilingual | Chinese / English copy follows the DSH language setting instantly |
 | Persistence | localStorage + IndexedDB; fully restored after page refresh and DSH restart |
 | Production form | Composition plugin `dsh-gui-customization`, survives restarts, listed under Settings → Plugins |

@@ -4,7 +4,7 @@
 
 ## dsh-gui-customization
 
-DeepSeek Harness Web UI 的**主题定制插件**：Nous 蓝默认配色（明暗双模式）、四套预设与 13 色自定义、氛围光（光晕/呼吸/位置实时可调）、背景图（原生文件选择 + 内置预设「deepseek娘01」），中英双语、设置持久化、跨重启保留。配置入口：设置 → 界面设定。
+DeepSeek Harness Web UI 的**主题定制插件**：Nous 蓝默认配色（明暗双模式）、四套预设与 13 色自定义、氛围光（光晕/呼吸/位置实时可调）、动态背景（图片/视频，原生文件选择 + 内置预设「deepseek娘01」+ 侧边栏透明开关）、配色导入/导出，中英双语、设置持久化、跨重启保留。配置入口：设置 → 界面设定。
 
 > [最新 Release](https://github.com/LAN-TINA-WS/dsh-gui-customization/releases/latest) ·  [dsh-plugin 生态](https://github.com/topics/dsh-plugin) · 安装：`dsh plugin --profile web add link:<目录>`（见「快速开始 → 发布轨」）
 
@@ -20,7 +20,8 @@ DeepSeek Harness Web UI 的**主题定制插件**：Nous 蓝默认配色（明�
 | --- | --- |
 | 配色 | Nous 蓝默认主题（明暗双模式）+ 系统默认/Nous 蓝/靛紫/翡翠绿四预设 + 13 色自定义 |
 | 氛围光 | 角落光晕随主题主色联动；强度、呼吸幅度、位置（5 模式）实时可调 |
-| 背景图 | 原生文件选择对话框直接选图；主区透图 + 明暗自适应遮罩；数据存 IndexedDB |
+| 动态背景 | 图片（原生选文件 + 预设「deepseek娘01」）与视频（静音循环）双模式，互斥切换；主区透出 + 明暗自适应遮罩；侧边栏透明开关；IndexedDB 持久化 |
+| 导入/导出 | 配色方案一键导出 JSON（自动复制剪贴板）、粘贴导入即应用 |
 | 双语 | 中 / 英文案随 DSH 语言设置即时切换 |
 | 持久化 | localStorage + IndexedDB，刷新页面与重启 DSH 后完整恢复 |
 | 正式形态 | 组合插件 `dsh-gui-customization`，跨重启存在，出现在「设置 → 插件」区 |
