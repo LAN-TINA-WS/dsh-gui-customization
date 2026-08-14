@@ -793,7 +793,7 @@ export function apply(ctx: Ctx) {
   }
 
   // ---- 设置导航图标增强（插件框架内手术式方案：失效静默降级为齿轮）----
-  const NAV_ICON_SVG = '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M8 2.5a5.5 5.5 0 1 1 0 11a5.5 5.5 0 0 1 0-11z"/><circle cx="5.95" cy="5.95" r="1" fill="currentColor" stroke="none"/><circle cx="10.05" cy="5.95" r="1" fill="currentColor" stroke="none"/><circle cx="5.95" cy="10.05" r="1" fill="currentColor" stroke="none"/><circle cx="10.05" cy="10.05" r="1" fill="currentColor" stroke="none"/></svg>'
+  const NAV_ICON_SVG = '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="2.2" y="3.2" width="11.6" height="9.6" rx="1.8"/><path d="M5 6.7l1.8 1.8-1.8 1.8"/><path d="M9 10.3h2.6"/></svg>'
 
   function enhanceNavIcon() {
     // 已应用且标记仍在（产品未重渲染）→ 跳过
