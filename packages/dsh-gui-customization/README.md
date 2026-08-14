@@ -22,10 +22,10 @@ node <harness>\apps\cli\lib\bin.js plugin --profile web add link:<repo>\packages
 
 ## 台账
 
-- **v0.1.0（当前）**：组合包首版。功能 = 动态版 v7 等价 + 真选文件 + 背景图可见性。挂载 `@core/gui-customization` ✅ → 重启加载 ✅（settings.section / settings.plugin.item / shell.overlay 三槽位注册，视觉三项验证通过）→ 更名 `dsh-gui-customization`（remove 旧 + add 新 ✅）→ 迭代：①「系统默认」保留背景图；② 系统默认+背景图下读回产品默认令牌（body 计算值）重建半透明层；③ 背景图布局模式实验（见规划，已回退）。
+- **v0.1.0（当前）**：组合包首版。功能 = 动态版 v7 等价 + 真选文件 + 背景图可见性。挂载 `@core/gui-customization`  → 重启加载 （settings.section / settings.plugin.item / shell.overlay 三槽位注册，视觉三项验证通过）→ 更名 `dsh-gui-customization`（remove 旧 + add 新 ）→ 迭代：①「系统默认」保留背景图；② 系统默认+背景图下读回产品默认令牌（body 计算值）重建半透明层；③ 背景图布局模式实验（见规划，已回退）。
 
 ## 规划（待办）
 
 - **P1 背景图「内容区布局」重做**：首版实验（图宽放大 + 左偏移）能随侧边栏移动但**右侧未对齐**（右缘溢出被裁），已回退。正确方案：不用 body 背景，改为**独立背景层元素**——插件注入 fixed div（`left: var(--guic-bg-left); right: 0; top: 0; bottom: 0`，pointer-events none，DOM 在产品 #root 之前），图在**该元素内**做 cover——元素宽 = 内容区宽，cover 天然右对齐且随侧边栏收缩；哨兵测量方案（dock 哨兵 + rAF）可复用。
 - **P2 明暗分离编辑**：light/dark 各 13 色独立编辑（当前 dark 自动配套）。
-- **P3 导入/导出**：配色方案 JSON 复制粘贴；快捷入口（会话头部调色板）；emoji 图标（label `🎨 界面设定`）。
+- **P3 导入/导出**：配色方案 JSON 复制粘贴；快捷入口（会话头部调色板）；emoji 图标（label ` 界面设定`）。

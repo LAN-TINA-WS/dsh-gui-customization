@@ -6,11 +6,11 @@
 
 DeepSeek Harness Web UI 的**主题定制插件**：Nous 蓝默认配色（明暗双模式）、四套预设与 13 色自定义、氛围光（光晕/呼吸/位置实时可调）、背景图（原生文件选择 + 内置预设「deepseek娘01」），中英双语、设置持久化、跨重启保留。配置入口：设置 → 界面设定。
 
-> 📦 [最新 Release](https://github.com/LAN-TINA-WS/dsh-gui-customization/releases/latest) · 🏷️ [dsh-plugin 生态](https://github.com/topics/dsh-plugin) · 安装：`dsh plugin --profile web add link:<目录>`（见「快速开始 → 发布轨」）
+> [最新 Release](https://github.com/LAN-TINA-WS/dsh-gui-customization/releases/latest) ·  [dsh-plugin 生态](https://github.com/topics/dsh-plugin) · 安装：`dsh plugin --profile web add link:<目录>`（见「快速开始 → 发布轨」）
 
 基于 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（DSH）的插件开发项目：以**动态 Cordis 插件**快速迭代创意，以**组合插件**发布稳定成品。当前首个成品 **GUICustomization**（界面设定）已上线运行。
 
-## ✨ 成品展示：GUICustomization
+## 成品展示：GUICustomization
 
 让用户自定义 DSH 界面的主题插件——默认「Nous 蓝」配色、氛围光、背景图，全部在「设置 → 界面设定」中配置，设置持久化、跨重启保留。
 
@@ -18,16 +18,16 @@ DeepSeek Harness Web UI 的**主题定制插件**：Nous 蓝默认配色（明�
 
 | 能力 | 说明 |
 | --- | --- |
-| 🎨 配色 | Nous 蓝默认主题（明暗双模式）+ 系统默认/Nous 蓝/靛紫/翡翠绿四预设 + 13 色自定义 |
-| ✨ 氛围光 | 角落光晕随主题主色联动；强度、呼吸幅度、位置（5 模式）实时可调 |
-| 🖼️ 背景图 | 原生文件选择对话框直接选图；主区透图 + 明暗自适应遮罩；数据存 IndexedDB |
-| 🌐 双语 | 中 / 英文案随 DSH 语言设置即时切换 |
-| 💾 持久化 | localStorage + IndexedDB，刷新页面与重启 DSH 后完整恢复 |
-| 🧩 正式形态 | 组合插件 `dsh-gui-customization`，跨重启存在，出现在「设置 → 插件」区 |
+| 配色 | Nous 蓝默认主题（明暗双模式）+ 系统默认/Nous 蓝/靛紫/翡翠绿四预设 + 13 色自定义 |
+| 氛围光 | 角落光晕随主题主色联动；强度、呼吸幅度、位置（5 模式）实时可调 |
+| 背景图 | 原生文件选择对话框直接选图；主区透图 + 明暗自适应遮罩；数据存 IndexedDB |
+| 双语 | 中 / 英文案随 DSH 语言设置即时切换 |
+| 持久化 | localStorage + IndexedDB，刷新页面与重启 DSH 后完整恢复 |
+| 正式形态 | 组合插件 `dsh-gui-customization`，跨重启存在，出现在「设置 → 插件」区 |
 
 > 交付档案见 [`packages/dsh-gui-customization/README.md`](packages/dsh-gui-customization/README.md)（含功能清单、构建安装、版本台账与规划）。
 
-## 🛤️ 双轨工作流（开发 / 发布分离）
+## 双轨工作流（开发 / 发布分离）
 
 | | 开发轨（动态插件） | 发布轨（组合插件） |
 | --- | --- | --- |
@@ -47,7 +47,7 @@ DeepSeek Harness Web UI 的**主题定制插件**：Nous 蓝默认配色（明�
 
 > 转正实战的完整施工记录见 [`docs/roadmap-composition.md`](docs/roadmap-composition.md)（GUICustomization v7 → 组合包 v0.1.0 全过程）。
 
-## 📂 目录结构
+## 目录结构
 
 ```
 dsh-gui-customization/
@@ -68,7 +68,7 @@ dsh-gui-customization/
     └── restart-dsh.ps1           # 独立 DSH 重启脚本（脱离进程运行）
 ```
 
-## 🚀 快速开始
+## 快速开始
 
 ### 开发轨：动态插件循环
 
@@ -94,13 +94,13 @@ node <harness>\apps\cli\lib\bin.js plugin --profile web add link:<repo>\packages
 - `node <harness>\apps\cli\lib\bin.js --profile web --dump-config` — 确认配置层挂载
 - 页面「设置 → 界面设定」「设置 → 插件」— 确认槽位与卡片
 
-## 📚 运行时要点
+## 运行时要点
 
 - **动态插件**是进程内临时扩展：`cordis_define` 不写磁盘，定义不跨进程重启存活；代码版本不可变（修改 = 追加新 Package）；插件归属当前会话。仓库文件是持久源码，运行态 pluginId/packageId 记回各插件 README 台账。
 - **组合插件**经 `dsh plugin --profile web add` 挂入部署组合，`clientModules` 服务扫描 `dsh.client` 声明组成 Web 启动图，重启后加载。
 - 开发约束：纯 JS 函数体（无 JSX/TS/import）；UI 必须注册进查询过的槽位；一切副作用挂本 Fiber；`ctx.get('name')` 读可选服务，`inject: ['name']` 只用于硬依赖。详见 [`docs/conventions.md`](docs/conventions.md)。
 
-## 🔍 文档索引
+## 文档索引
 
 | 文档 | 内容 |
 | --- | --- |

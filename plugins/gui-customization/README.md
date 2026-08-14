@@ -48,7 +48,7 @@
 | --- | --- | --- | --- | --- |
 | 1 | 组合插件转正 | Client(+Host) | 组合 | 把源码包装为组合插件挂入部署（`dsh.client` 机制），出现在「设置 → 插件」区，跨重启存在 |
 | 2 | 配色持久化 | Host+Client | 组合 | Host 半用 `settings` 服务注册命名空间（JSON schema）保存/恢复配色；跨刷新、跨重启生效 |
-| 3 | 过渡期持久化 | Host | 动态 | ✅ **已完成（v2）**：Host 半 RPC 读写工作区 `.guic.json`，刷新/重跑后恢复 |
+| 3 | 过渡期持久化 | Host | 动态 | **已完成（v2）**：Host 半 RPC 读写工作区 `.guic.json`，刷新/重跑后恢复 |
 
 ### P2 — 编辑体验
 
@@ -59,14 +59,14 @@
 | 6 | 输入校验 | Client | 非法 CSS 颜色值红框提示并拒绝应用，避免传给 theme 抛错 |
 | 7 | 预设扩充 + 导入/导出 | Client | 更多预设；当前配色导出为 JSON 文本复制/粘贴导入 |
 | 8 | 快捷入口 | Client | 会话头部（`conversation.session.header.actions`）调色板按钮，快速切预设 |
-| E1 | 氛围层 | Client | ✅ **已完成（v3/v4）**：角落光晕+呼吸动画+强度/呼吸幅度/位置调节，随主题联动（借鉴 dsh-web-ui 皮肤 scrim 手法） |
-| E2 | 背景图 | Client+Host | ✅ **已完成（v5，PoC 级）**：body 背景层 + 主题自适应 scrim + 面板半透明令牌；局限见「已知边界」 |
+| E1 | 氛围层 | Client | **已完成（v3/v4）**：角落光晕+呼吸动画+强度/呼吸幅度/位置调节，随主题联动（借鉴 dsh-web-ui 皮肤 scrim 手法） |
+| E2 | 背景图 | Client+Host | **已完成（v5，PoC 级）**：body 背景层 + 主题自适应 scrim + 面板半透明令牌；局限见「已知边界」 |
 
 ### P3 — 打磨（无伤大雅）
 
 | # | 功能 | 平台 | 说明 |
 | --- | --- | --- | --- |
-| 9 | 图标 | Client | label 内嵌 emoji（`🎨 界面配色`）零成本方案；真图标需自绘设置外壳或改 DSH，**不做** |
+| 9 | 图标 | Client | label 内嵌 emoji（` 界面配色`）零成本方案；真图标需自绘设置外壳或改 DSH，**不做** |
 | 10 | 本地化 | Client | label/文案接 `locale` 服务字典 |
 | 11 | Run 卡交互区 | Client | `tool.view.cordis`（key `self`）内放迷你配色条/预设切换 |
 | 12 | 主题联动 | Client | 监听 `theme/change`，系统明暗切换时同步 UI 状态提示 |
@@ -74,11 +74,11 @@
 ## 运行态台账
 
 <!-- 每次 define / run / update 后在此追加一行 -->
-- **v1**：define `guic-3/pkg-3`（GUICustomization v1，纯 Client）→ run `run-3`：✅ 已激活 → 用户 stop 后手动 run-4 ✅ → 重新加载 run-5 ✅
-- **v2**：define `guic-3/pkg-4`（GUICustomization v2，Host+Client，持久化 .guic.json）→ update `run-6`：✅ 已激活
-- **v3**：define `guic-3/pkg-5`（GUICustomization v3，+氛围层、更名「界面设定」、存档扩展 ambient）→ update `run-7`：✅ 已激活
-- **v4**：define `guic-3/pkg-6`（GUICustomization v4，呼吸幅度滑块 + 光晕位置 5 模式）→ update `run-8`：✅ 已激活
-- **v5**：define `guic-3/pkg-7`（GUICustomization v5，+背景图自定义）→ update `run-9`：✅ 已激活（反馈：主界面看不到图）
-- **v6**：define `guic-3/pkg-8`（GUICustomization v6，修复背景图可见性）→ update `run-10`：✅ 已激活（主区仍看不到图，留待组合版）
-- **v7**：define `guic-3/pkg-9`（GUICustomization v7，+文件管理器选图）→ update `run-11`：✅ 已激活
+- **v1**：define `guic-3/pkg-3`（GUICustomization v1，纯 Client）→ run `run-3`： 已激活 → 用户 stop 后手动 run-4  → 重新加载 run-5 
+- **v2**：define `guic-3/pkg-4`（GUICustomization v2，Host+Client，持久化 .guic.json）→ update `run-6`： 已激活
+- **v3**：define `guic-3/pkg-5`（GUICustomization v3，+氛围层、更名「界面设定」、存档扩展 ambient）→ update `run-7`： 已激活
+- **v4**：define `guic-3/pkg-6`（GUICustomization v4，呼吸幅度滑块 + 光晕位置 5 模式）→ update `run-8`： 已激活
+- **v5**：define `guic-3/pkg-7`（GUICustomization v5，+背景图自定义）→ update `run-9`： 已激活（反馈：主界面看不到图）
+- **v6**：define `guic-3/pkg-8`（GUICustomization v6，修复背景图可见性）→ update `run-10`： 已激活（主区仍看不到图，留待组合版）
+- **v7**：define `guic-3/pkg-9`（GUICustomization v7，+文件管理器选图）→ update `run-11`： 已激活
 - **退役**：随 DSH 重启蒸发；功能已由发布轨组合版 `dsh-gui-customization` v0.1.0 接替（packages/dsh-gui-customization/），双轨映射 **动态 v7 ↔ 组合 v0.1.0**

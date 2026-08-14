@@ -6,11 +6,11 @@
 
 A **theme customization plugin** for the DeepSeek Harness Web UI: default Nous Blue palette (light/dark), four presets and 13 custom colors, ambient glow (halo/breathing/position, live), background image (native file picker + built-in preset "DeepSeek Girl 01"), bilingual Chinese/English UI, persistent settings that survive restarts. Config entry: Settings → Interface Settings.
 
-> 📦 [Latest Release](https://github.com/LAN-TINA-WS/dsh-gui-customization/releases/latest) · 🏷️ [dsh-plugin ecosystem](https://github.com/topics/dsh-plugin) · Install: `dsh plugin --profile web add link:<dir>` (see "Quick Start → Release track")
+> [Latest Release](https://github.com/LAN-TINA-WS/dsh-gui-customization/releases/latest) ·  [dsh-plugin ecosystem](https://github.com/topics/dsh-plugin) · Install: `dsh plugin --profile web add link:<dir>` (see "Quick Start → Release track")
 
 A plugin development project on top of [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (DSH): ideas are iterated fast as **dynamic Cordis plugins**, and shipped stable as **composition plugins**. The first product, **GUICustomization** (Interface Settings), is live.
 
-## ✨ Featured: GUICustomization
+## Featured: GUICustomization
 
 A theme plugin that lets users customize the DSH interface — a default "Nous Blue" palette, ambient glow, and background image, all configurable under Settings → Interface Settings, with persistent settings that survive restarts.
 
@@ -18,16 +18,16 @@ A theme plugin that lets users customize the DSH interface — a default "Nous B
 
 | Capability | Notes |
 | --- | --- |
-| 🎨 Palette | Default Nous Blue theme (light/dark) + System default / Nous Blue / Indigo / Emerald presets + 13 custom colors |
-| ✨ Ambient glow | Corner halos that follow the theme's primary color; strength, breathing depth and position (5 modes) adjustable live |
-| 🖼️ Background image | Native file picker; conversation area shows the image with a light/dark-adaptive scrim; data kept in IndexedDB |
-| 🌐 Bilingual | Chinese / English copy follows the DSH language setting instantly |
-| 💾 Persistence | localStorage + IndexedDB; fully restored after page refresh and DSH restart |
-| 🧩 Production form | Composition plugin `dsh-gui-customization`, survives restarts, listed under Settings → Plugins |
+| Palette | Default Nous Blue theme (light/dark) + System default / Nous Blue / Indigo / Emerald presets + 13 custom colors |
+| Ambient glow | Corner halos that follow the theme's primary color; strength, breathing depth and position (5 modes) adjustable live |
+| Background image | Native file picker; conversation area shows the image with a light/dark-adaptive scrim; data kept in IndexedDB |
+| Bilingual | Chinese / English copy follows the DSH language setting instantly |
+| Persistence | localStorage + IndexedDB; fully restored after page refresh and DSH restart |
+| Production form | Composition plugin `dsh-gui-customization`, survives restarts, listed under Settings → Plugins |
 
 > Delivery record: [`packages/dsh-gui-customization/README.md`](packages/dsh-gui-customization/README.md) (features, build & install, ledger, roadmap).
 
-## 🛤️ Two-Track Workflow (Development / Release)
+## Two-Track Workflow (Development / Release)
 
 | | Dev track (dynamic plugin) | Release track (composition plugin) |
 | --- | --- | --- |
@@ -47,7 +47,7 @@ A theme plugin that lets users customize the DSH interface — a default "Nous B
 
 > The full migration runbook (GUICustomization v7 → composition v0.1.0) lives in [`docs/roadmap-composition.md`](docs/roadmap-composition.md).
 
-## 📂 Layout
+## Layout
 
 ```
 dsh-gui-customization/
@@ -69,7 +69,7 @@ dsh-gui-customization/
     └── restart-dsh.ps1           # detached DSH restart script
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Dev track: dynamic plugin loop
 
@@ -95,13 +95,13 @@ node <harness>\apps\cli\lib\bin.js plugin --profile web add link:<repo>\packages
 - `node <harness>\apps\cli\lib\bin.js --profile web --dump-config` — confirm the composition layer is mounted.
 - Page "Settings → Interface Settings" and "Settings → Plugins" — confirm slots and card.
 
-## 📚 Runtime Essentials
+## Runtime Essentials
 
 - **Dynamic plugins** are temporary in-process extensions: `cordis_define` writes nothing to disk, definitions do not survive a process restart; code versions are immutable (a change appends a new Package); plugins belong to the current session. Repo files are the durable source; runtime pluginId/packageId go back into each plugin's README ledger.
 - **Composition plugins** are mounted into the deployment via `dsh plugin --profile web add`; the `clientModules` service scans `dsh.client` declarations into the web boot graph and loads them after a restart.
 - Coding constraints: plain JS function bodies (no JSX/TS/import); UI must be registered in a queried Slot; every side effect belongs to the current Fiber; read optional services with `ctx.get('name')`, reserve `inject: ['name']` for hard dependencies. See [`docs/conventions.md`](docs/conventions.md).
 
-## 🔍 Document Index
+## Document Index
 
 | Document | Contents |
 | --- | --- |
