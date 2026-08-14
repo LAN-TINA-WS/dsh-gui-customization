@@ -54,6 +54,10 @@ Inside Settings → Interface Settings:
 
 Bugs, feature requests, palette sharing: post to [issue #1 (Welcome Feedback)](https://github.com/LAN-TINA-WS/dsh-gui-customization/issues/1).
 
+## License
+
+This project is licensed under the [MIT License](LICENSE). The tsdown build preset under `build/` is vendored from [dsh-web-ui](https://github.com/zhu1090093659/dsh-web-ui) (BSD-3-Clause, © zhu1090093659); its notice is preserved in each file header.
+
 ## Developer Docs
 
 Development craft (coding rules, DSH capability inventories, dynamic-prototype → composition-plugin migration) lives in [docs/](docs/):

@@ -54,6 +54,10 @@ dsh plugin --profile web add link:<仓库>/packages/dsh-gui-customization
 
 问题、需求、配色分享：提交到 [issue #1（欢迎反馈）](https://github.com/LAN-TINA-WS/dsh-gui-customization/issues/1)。
 
+## License
+
+本项目采用 [MIT License](LICENSE)。仓库内 `build/` 下的 tsdown 构建 preset 源自 [dsh-web-ui](https://github.com/zhu1090093659/dsh-web-ui)（BSD-3-Clause，© zhu1090093659），其许可声明保留在各文件头部。
+
 ## 开发者文档
 
 开发工艺（编写规范、DSH 能力清单、动态插件原型 → 组合插件转正流程）见 [docs/](docs/)：
