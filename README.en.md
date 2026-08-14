@@ -20,7 +20,7 @@ A theme plugin that lets users customize the DSH interface — a default "Nous B
 | --- | --- |
 | Palette | Default Nous Blue theme (light/dark) + System default / Nous Blue / Indigo / Emerald presets + 13 custom colors |
 | Ambient glow | Corner halos that follow the theme's primary color; strength, breathing depth and position (5 modes) adjustable live |
-| Dynamic background | Image (native picker + preset "DeepSeek Girl 01") and video (muted loop) modes, mutually exclusive; conversation area shows through with a light/dark-adaptive scrim; sidebar transparency toggle; IndexedDB persistence |
+| Dynamic background | Image (native picker + preset "DeepSeek Girl 01") and video (muted loop) modes, mutually exclusive; conversation area shows through with a light/dark-adaptive scrim; opacity slider + sidebar transparency toggle; IndexedDB persistence |
 | Import / export | One-click palette JSON export (clipboard copy) and paste-to-apply import |
 | Bilingual | Chinese / English copy follows the DSH language setting instantly |
 | Persistence | localStorage + IndexedDB; fully restored after page refresh and DSH restart |

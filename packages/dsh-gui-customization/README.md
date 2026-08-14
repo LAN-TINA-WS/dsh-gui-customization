@@ -4,10 +4,11 @@ GUICustomization 的正式组合插件形态（曾用名 `@core/gui-customizatio
 
 ## 功能
 
-- Nous 蓝默认配色（明暗双模式）+ 三预设 + 13 色自定义
+- Nous 蓝默认配色（明暗双模式）+ 四预设 + 13 色自定义
 - 氛围层：角落光晕（随主题 brand-primary）+ 呼吸动画（幅度可调）+ 强度 + 位置 5 模式
-- 背景图：**真·文件选择对话框**（input[type=file] + FileReader）+ body 属性正规方案（`body[data-guic-bg]`，scrim 随明暗自适应）→ 对话主区真正透图
-- 持久化：设置 localStorage + 背景图 IndexedDB（跨刷新/跨重启保留，纯浏览器端）
+- 背景：图片（真·文件选择对话框 + 预设「deepseek娘01」）与视频（静音循环）双模式；主区透图 + 明暗自适应遮罩 + **背景透明度滑块** + 侧边栏透明开关
+- 配色导入/导出（JSON + 剪贴板）
+- 中英双语、持久化（设置 localStorage + 背景 IndexedDB，跨刷新/跨重启保留）
 - 设置页「界面设定」+ 插件配置区卡片（设置 → 插件）
 
 ## 构建与安装
