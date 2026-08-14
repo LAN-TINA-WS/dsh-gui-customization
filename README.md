@@ -2,6 +2,8 @@
 
 中文 | [English](README.en.md)
 
+![DeepSeek Harness 时装工坊 · dsh-gui-customization](docs/screenshots/gui-customization-poster.jpg)
+
 ## dsh-gui-customization
 
 DeepSeek Harness Web UI 的**主题定制插件**：Nous 蓝默认配色（明暗双模式）、四套预设与 13 色自定义、氛围光（光晕/呼吸/位置实时可调）、动态背景（图片/视频，原生文件选择 + 内置预设「deepseek娘01」+ 背景透明度滑块 + 侧边栏透明开关）、配色导入/导出，中英双语、设置持久化、跨重启保留。配置入口：设置 → 界面设定。
