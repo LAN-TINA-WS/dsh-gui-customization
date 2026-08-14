@@ -1,4 +1,4 @@
-# CORE — DeepSeek Harness 插件工坊
+# dsh-gui-customization — DeepSeek Harness 插件工坊
 
 中文 | [English](README.en.md)
 
@@ -44,7 +44,7 @@
 ## 📂 目录结构
 
 ```
-CORE/
+dsh-gui-customization/
 ├── README.md                     # 本文件
 ├── docs/
 │   ├── conventions.md            # 编写规范：纯 JS、生命周期、活数据、版本审批
@@ -74,11 +74,11 @@ CORE/
 ### 发布轨：组合插件构建与安装
 
 ```sh
-# 构建（CORE 根）
+# 构建（仓库根）
 pnpm build            # 产出 packages/*/lib/{index,client}.js
 
 # 安装进 web profile
-node <harness>\apps\cli\lib\bin.js plugin --profile web add link:<CORE>\packages\dsh-gui-customization
+node <harness>\apps\cli\lib\bin.js plugin --profile web add link:<repo>\packages\dsh-gui-customization
 
 # 重启 dsh web 生效（桌面「启动DeepSeekHarness.bat」：菜单 2 停止 → 再启动）
 ```

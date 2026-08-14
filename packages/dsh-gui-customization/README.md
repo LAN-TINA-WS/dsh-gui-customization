@@ -13,10 +13,10 @@ GUICustomization 的正式组合插件形态（曾用名 `@core/gui-customizatio
 ## 构建与安装
 
 ```sh
-# 构建（在包目录或 CORE 根）
+# 构建（在包目录或仓库根）
 pnpm build          # 产出 lib/index.js + lib/client.js
 # 安装进 web profile
-node <harness>\apps\cli\lib\bin.js plugin --profile web add link:<CORE>\packages\dsh-gui-customization
+node <harness>\apps\cli\lib\bin.js plugin --profile web add link:<repo>\packages\dsh-gui-customization
 # 重启 dsh web 生效
 ```
 

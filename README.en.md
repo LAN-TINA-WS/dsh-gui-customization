@@ -1,4 +1,4 @@
-# CORE — DeepSeek Harness Plugin Workshop
+# dsh-gui-customization — DeepSeek Harness Plugin Workshop
 
 [中文](README.md) | English
 
@@ -44,7 +44,7 @@ A theme plugin that lets users customize the DSH interface — a default "Nous B
 ## 📂 Layout
 
 ```
-CORE/
+dsh-gui-customization/
 ├── README.md                     # this file (Chinese)
 ├── README.en.md                  # this file (English)
 ├── docs/
@@ -75,11 +75,11 @@ CORE/
 ### Release track: build & install a composition plugin
 
 ```sh
-# Build (from the CORE root)
+# Build (from the repo root)
 pnpm build            # emits packages/*/lib/{index,client}.js
 
 # Install into the web profile
-node <harness>\apps\cli\lib\bin.js plugin --profile web add link:<CORE>\packages\dsh-gui-customization
+node <harness>\apps\cli\lib\bin.js plugin --profile web add link:<repo>\packages\dsh-gui-customization
 
 # Restart dsh web to take effect (desktop "启动DeepSeekHarness.bat": menu 2 to stop → run again)
 ```
