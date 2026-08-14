@@ -253,6 +253,18 @@ window.__ModuleLoader__.load({
 		function deleteBackground() {
 			idbDel(BG_KEY);
 		}
+		const VIDEO_KEY = "video";
+		async function loadVideo() {
+			const value = await idbGet(VIDEO_KEY);
+			if (value !== null && typeof value === "object" && value.size !== void 0) return value;
+			return null;
+		}
+		function saveVideo(file) {
+			idbSet(VIDEO_KEY, file);
+		}
+		function deleteVideo() {
+			idbDel(VIDEO_KEY);
+		}
 		//#endregion
 		//#region src/client/i18n.ts
 		/**
@@ -308,6 +320,9 @@ window.__ModuleLoader__.load({
 			"bg.clear": "清除背景图",
 			"bg.preset": "预设背景",
 			"bg.preset.image2": "deepseek娘01",
+			"bg.video.status": "视频背景",
+			"bg.video.choose": "选择视频文件…",
+			"bg.video.clear": "清除视频",
 			"bg.note": "开启后对话主区大幅透出图片（底色降至 30% 不透明），卡片与侧栏轻微透图，遮罩随明暗自适应；图片数据存于浏览器 IndexedDB，刷新与重启后自动恢复。",
 			"notice.defaultApplied": "默认「{name}」配色已应用",
 			"notice.loaded": "已加载保存的配色",
@@ -316,6 +331,7 @@ window.__ModuleLoader__.load({
 			"notice.appliedPreset": "已应用「{name}」",
 			"notice.customApplied": "已应用并保存自定义配色",
 			"notice.bgApplied": "背景图已应用",
+			"notice.videoApplied": "视频背景已应用",
 			"notice.bgCleared": "背景图已清除",
 			"notice.bgReadError": "图片读取失败",
 			"notice.bgReadback": "已还原系统默认配色（背景图保留；bg-base 读回: {value}）",
@@ -370,6 +386,9 @@ window.__ModuleLoader__.load({
 			"bg.clear": "Remove background",
 			"bg.preset": "Preset backgrounds",
 			"bg.preset.image2": "DeepSeek Girl 01",
+			"bg.video.status": "Video background",
+			"bg.video.choose": "Choose video file…",
+			"bg.video.clear": "Remove video",
 			"bg.note": "When enabled the conversation area shows the image (base surface drops to 30% opacity), cards and sidebar stay slightly translucent, and the scrim adapts to light/dark. Image data is kept in browser IndexedDB and restored across refreshes and restarts.",
 			"notice.defaultApplied": "Default “{name}” palette applied",
 			"notice.loaded": "Saved palette loaded",
@@ -378,6 +397,7 @@ window.__ModuleLoader__.load({
 			"notice.appliedPreset": "Applied “{name}”",
 			"notice.customApplied": "Custom palette applied and saved",
 			"notice.bgApplied": "Background image applied",
+			"notice.videoApplied": "Video background applied",
 			"notice.bgCleared": "Background image removed",
 			"notice.bgReadError": "Failed to read image",
 			"notice.bgReadback": "System defaults restored (background kept; bg-base read: {value})",
@@ -486,11 +506,20 @@ window.__ModuleLoader__.load({
 				ambientListeners.slice().forEach((fn) => fn(ambientState));
 			}
 			let bgEnabled = false;
+			let bgKind = "image";
 			let bgTag = null;
+			let videoLayer = null;
+			let videoEl = null;
+			let videoUrl = null;
 			const bgListeners = [];
+			const bgKindListeners = [];
 			function setBg(enabled) {
 				bgEnabled = enabled;
 				bgListeners.slice().forEach((fn) => fn(enabled));
+			}
+			function setBgKind(kind) {
+				bgKind = kind;
+				bgKindListeners.slice().forEach((fn) => fn(kind));
 			}
 			ctx.effect(() => () => {
 				if (bgTag !== null) {
@@ -498,7 +527,53 @@ window.__ModuleLoader__.load({
 					bgTag = null;
 				}
 				delete document.body.dataset.guicBg;
+				removeVideoLayer();
 			});
+			function ensureVideoLayer() {
+				if (videoLayer !== null && videoEl !== null) return {
+					layer: videoLayer,
+					video: videoEl
+				};
+				videoLayer = document.createElement("div");
+				videoLayer.dataset.plugin = "dsh-gui-customization";
+				videoLayer.dataset.pluginCss = "guic-video";
+				videoLayer.style.cssText = "position: fixed; inset: 0; pointer-events: none; z-index: 0;";
+				videoEl = document.createElement("video");
+				videoEl.autoplay = true;
+				videoEl.muted = true;
+				videoEl.loop = true;
+				videoEl.setAttribute("playsinline", "");
+				videoEl.style.cssText = "position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;";
+				const scrim = document.createElement("div");
+				scrim.style.cssText = "position: absolute; inset: 0; background: linear-gradient(color-mix(in srgb, var(--dsw-alias-bg-layer-1) 88%, transparent) 0%, color-mix(in srgb, var(--dsw-alias-bg-layer-1) 80%, transparent) 60%, color-mix(in srgb, var(--dsw-alias-bg-layer-1) 72%, transparent) 100%);";
+				videoLayer.appendChild(videoEl);
+				videoLayer.appendChild(scrim);
+				const rootEl = document.getElementById("root");
+				if (rootEl !== null) document.body.insertBefore(videoLayer, rootEl);
+				else document.body.appendChild(videoLayer);
+				return {
+					layer: videoLayer,
+					video: videoEl
+				};
+			}
+			function removeVideoLayer() {
+				if (videoUrl !== null) {
+					try {
+						URL.revokeObjectURL(videoUrl);
+					} catch {}
+					videoUrl = null;
+				}
+				if (videoEl !== null) {
+					try {
+						videoEl.pause();
+					} catch {}
+					videoEl = null;
+				}
+				if (videoLayer !== null) {
+					videoLayer.remove();
+					videoLayer = null;
+				}
+			}
 			function buildTokens(light, brandDark) {
 				const dark = { ...DARK };
 				dark["brand-primary"] = brandDark;
@@ -544,7 +619,8 @@ window.__ModuleLoader__.load({
 				saveSettings({
 					colors: currentColors,
 					brandDark: currentBrandDark,
-					ambient: ambientState
+					ambient: ambientState,
+					bgKind
 				});
 			}
 			function buildBgCss(mime, data) {
@@ -560,6 +636,7 @@ window.__ModuleLoader__.load({
 				].join("\n");
 			}
 			function applyBackgroundData(bg) {
+				clearVideoBackground();
 				if (bgTag === null) {
 					bgTag = document.createElement("style");
 					bgTag.dataset.plugin = "dsh-gui-customization";
@@ -569,6 +646,7 @@ window.__ModuleLoader__.load({
 				bgTag.textContent = buildBgCss(bg.mime, bg.data);
 				document.body.dataset.guicBg = "1";
 				setBg(true);
+				setBgKind("image");
 				renderTheme();
 			}
 			function clearBackground() {
@@ -581,6 +659,25 @@ window.__ModuleLoader__.load({
 				deleteBackground();
 				renderTheme();
 			}
+			function applyVideoData(file) {
+				clearBackground();
+				const { video } = ensureVideoLayer();
+				if (videoUrl !== null) try {
+					URL.revokeObjectURL(videoUrl);
+				} catch {}
+				videoUrl = URL.createObjectURL(file);
+				video.src = videoUrl;
+				video.play().catch(() => {});
+				setBg(true);
+				setBgKind("video");
+				renderTheme();
+			}
+			function clearVideoBackground() {
+				removeVideoLayer();
+				if (bgKind === "video") setBg(false);
+				deleteVideo();
+				if (bgKind === "video") renderTheme();
+			}
 			applyColors(PALETTES.nous.light, PALETTES.nous.brandDark);
 			const saved = loadSettings();
 			if (saved !== null && saved.colors !== void 0 && typeof saved.colors === "object") {
@@ -591,8 +688,12 @@ window.__ModuleLoader__.load({
 					...saved.ambient
 				});
 			}
+			if (saved !== null && (saved.bgKind === "video" || saved.bgKind === "image")) setBgKind(saved.bgKind);
 			loadBackground().then((bg) => {
-				if (bg !== null && !userTouched) applyBackgroundData(bg);
+				if (bg !== null && !userTouched && bgKind === "image") applyBackgroundData(bg);
+			});
+			loadVideo().then((video) => {
+				if (video !== null && !userTouched && bgKind === "video") applyVideoData(video);
 			});
 			function AmbientLayer() {
 				const [state, setState] = (0, react.useState)(ambientState);
@@ -624,6 +725,7 @@ window.__ModuleLoader__.load({
 				const [notice, setNotice] = (0, react.useState)(t("notice.defaultApplied", { name: t("preset.nous") }));
 				const [ambient, setAmbientUi] = (0, react.useState)(ambientState);
 				const [bg, setBgUi] = (0, react.useState)(bgEnabled);
+				const [bgKindUi, setBgKindUi] = (0, react.useState)(bgKind);
 				const [langTick, setLangTick] = (0, react.useState)(0);
 				const [ioText, setIoText] = (0, react.useState)("");
 				(0, react.useEffect)(() => {
@@ -661,6 +763,14 @@ window.__ModuleLoader__.load({
 						if (i >= 0) bgListeners.splice(i, 1);
 					};
 				}, []);
+				(0, react.useEffect)(() => {
+					const listener = (kind) => setBgKindUi(kind);
+					bgKindListeners.push(listener);
+					return () => {
+						const i = bgKindListeners.indexOf(listener);
+						if (i >= 0) bgKindListeners.splice(i, 1);
+					};
+				}, []);
 				const update = (key, value) => {
 					userTouched = true;
 					setColors((prev) => ({
@@ -695,6 +805,13 @@ window.__ModuleLoader__.load({
 					};
 					reader.onerror = () => setNotice(t("notice.bgReadError"));
 					reader.readAsDataURL(file);
+				};
+				const handleVideoFile = (file) => {
+					userTouched = true;
+					applyVideoData(file);
+					saveVideo(file);
+					persist();
+					setNotice(t("notice.videoApplied"));
 				};
 				const choosePreset = (key) => () => {
 					userTouched = true;
@@ -860,7 +977,23 @@ window.__ModuleLoader__.load({
 						persist();
 						setNotice(t("notice.bgApplied"));
 					}
-				}, t("bg.preset." + key)))), (0, react.createElement)("div", { className: "guic-note" }, t("bg.note")), (0, react.createElement)("div", { className: "guic-notice" }, notice), (0, react.createElement)("div", { className: "guic-note" }, t("hint.persist")));
+				}, t("bg.preset." + key)))), (0, react.createElement)("div", { className: "guic-ambient-row" }, (0, react.createElement)("span", { className: "guic-field-label" }, t("bg.video.status")), (0, react.createElement)("span", { className: "guic-note" }, bgKindUi === "video" && bg ? t("ambient.on") : t("ambient.off")), (0, react.createElement)("label", { className: "guic-btn guic-btn-primary" }, (0, react.createElement)("input", {
+					type: "file",
+					accept: "video/*",
+					style: { display: "none" },
+					onChange: (ev) => {
+						const file = ev.target !== null && ev.target.files !== null && ev.target.files.length > 0 ? ev.target.files[0] : null;
+						if (file !== null) handleVideoFile(file);
+					}
+				}), t("bg.video.choose")), (0, react.createElement)("button", {
+					className: "guic-btn",
+					onClick: () => {
+						userTouched = true;
+						clearVideoBackground();
+						persist();
+						setNotice(t("notice.bgCleared"));
+					}
+				}, t("bg.video.clear"))), (0, react.createElement)("div", { className: "guic-note" }, t("bg.note")), (0, react.createElement)("div", { className: "guic-notice" }, notice), (0, react.createElement)("div", { className: "guic-note" }, t("hint.persist")));
 			}
 			function PluginCard() {
 				return (0, react.createElement)("div", { className: "guic-plugin-card" }, (0, react.createElement)("div", { className: "guic-plugin-name" }, t("plugin.name")), (0, react.createElement)("div", { className: "guic-plugin-desc" }, t("plugin.desc")));

@@ -128,3 +128,23 @@ export function saveBackground(bg: BackgroundData): void {
 export function deleteBackground(): void {
   void idbDel(BG_KEY)
 }
+
+// ---- 视频背景：File/Blob 直接存 IndexedDB（无需 base64）----
+
+const VIDEO_KEY = 'video'
+
+export async function loadVideo(): Promise<Blob | null> {
+  const value = await idbGet(VIDEO_KEY)
+  if (value !== null && typeof value === 'object' && (value as Blob).size !== undefined) {
+    return value as Blob
+  }
+  return null
+}
+
+export function saveVideo(file: Blob): void {
+  void idbSet(VIDEO_KEY, file)
+}
+
+export function deleteVideo(): void {
+  void idbDel(VIDEO_KEY)
+}

@@ -15,6 +15,7 @@ import {
 import {
   loadSettings, saveSettings, clearSettings,
   loadBackground, saveBackground, deleteBackground, BackgroundData,
+  loadVideo, saveVideo, deleteVideo,
 } from './store'
 import { DICT_ZH, DICT_EN } from './i18n'
 import { PRESET_BACKGROUNDS } from './assets.generated'
@@ -125,16 +126,67 @@ export function apply(ctx: Ctx) {
   }
 
   let bgEnabled = false
+  let bgKind: 'image' | 'video' = 'image'
   let bgTag: HTMLStyleElement | null = null
+  let videoLayer: HTMLDivElement | null = null
+  let videoEl: HTMLVideoElement | null = null
+  let videoUrl: string | null = null
   const bgListeners: Array<(enabled: boolean) => void> = []
+  const bgKindListeners: Array<(kind: 'image' | 'video') => void> = []
   function setBg(enabled: boolean) {
     bgEnabled = enabled
     bgListeners.slice().forEach((fn) => fn(enabled))
   }
+  function setBgKind(kind: 'image' | 'video') {
+    bgKind = kind
+    bgKindListeners.slice().forEach((fn) => fn(kind))
+  }
   ctx.effect(() => () => {
     if (bgTag !== null) { bgTag.remove(); bgTag = null }
     delete document.body.dataset.guicBg
+    removeVideoLayer()
   })
+
+  // ---- 视频背景层（fixed 垫底：#root 之前插入，内容自然覆盖其上）----
+  function ensureVideoLayer(): { layer: HTMLDivElement; video: HTMLVideoElement } {
+    if (videoLayer !== null && videoEl !== null) return { layer: videoLayer, video: videoEl }
+    videoLayer = document.createElement('div')
+    videoLayer.dataset.plugin = 'dsh-gui-customization'
+    videoLayer.dataset.pluginCss = 'guic-video'
+    videoLayer.style.cssText = 'position: fixed; inset: 0; pointer-events: none; z-index: 0;'
+    videoEl = document.createElement('video')
+    videoEl.autoplay = true
+    videoEl.muted = true
+    videoEl.loop = true
+    videoEl.setAttribute('playsinline', '')
+    videoEl.style.cssText = 'position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;'
+    const scrim = document.createElement('div')
+    scrim.style.cssText = 'position: absolute; inset: 0; background: linear-gradient(color-mix(in srgb, var(--dsw-alias-bg-layer-1) 88%, transparent) 0%, color-mix(in srgb, var(--dsw-alias-bg-layer-1) 80%, transparent) 60%, color-mix(in srgb, var(--dsw-alias-bg-layer-1) 72%, transparent) 100%);'
+    videoLayer.appendChild(videoEl)
+    videoLayer.appendChild(scrim)
+    const rootEl = document.getElementById('root')
+    if (rootEl !== null) {
+      document.body.insertBefore(videoLayer, rootEl)
+    } else {
+      document.body.appendChild(videoLayer)
+    }
+    return { layer: videoLayer, video: videoEl }
+  }
+
+  function removeVideoLayer() {
+    if (videoUrl !== null) {
+      try { URL.revokeObjectURL(videoUrl) } catch { /* ignore */ }
+      videoUrl = null
+    }
+    if (videoEl !== null) {
+      try { videoEl.pause() } catch { /* ignore */ }
+      videoEl = null
+    }
+    if (videoLayer !== null) {
+      videoLayer.remove()
+      videoLayer = null
+    }
+  }
 
   // ---- 主题引擎 ----
   function buildTokens(light: Record<string, string>, brandDark: string): Record<string, { light: string; dark: string }> {
@@ -199,7 +251,7 @@ export function apply(ctx: Ctx) {
   }
 
   function persist() {
-    saveSettings({ colors: currentColors, brandDark: currentBrandDark, ambient: ambientState })
+    saveSettings({ colors: currentColors, brandDark: currentBrandDark, ambient: ambientState, bgKind })
   }
 
   // ---- 背景图引擎（body 属性正规方案，scrim 随明暗自适应）----
@@ -219,6 +271,8 @@ export function apply(ctx: Ctx) {
   }
 
   function applyBackgroundData(bg: BackgroundData) {
+    // 互斥：图片与视频背景二选一
+    clearVideoBackground()
     if (bgTag === null) {
       bgTag = document.createElement('style')
       bgTag.dataset.plugin = 'dsh-gui-customization'
@@ -228,6 +282,7 @@ export function apply(ctx: Ctx) {
     bgTag.textContent = buildBgCss(bg.mime, bg.data)
     document.body.dataset.guicBg = '1'
     setBg(true)
+    setBgKind('image')
     renderTheme()
   }
 
@@ -237,6 +292,28 @@ export function apply(ctx: Ctx) {
     setBg(false)
     deleteBackground()
     renderTheme()
+  }
+
+  // ---- 视频背景引擎（video 垫底层 + scrim，Blob URL 播放）----
+  function applyVideoData(file: Blob) {
+    clearBackground()
+    const { video } = ensureVideoLayer()
+    if (videoUrl !== null) {
+      try { URL.revokeObjectURL(videoUrl) } catch { /* ignore */ }
+    }
+    videoUrl = URL.createObjectURL(file)
+    video.src = videoUrl
+    void video.play().catch(() => { /* autoplay 失败则静默，用户可手动触发 */ })
+    setBg(true)
+    setBgKind('video')
+    renderTheme()
+  }
+
+  function clearVideoBackground() {
+    removeVideoLayer()
+    if (bgKind === 'video') setBg(false)
+    deleteVideo()
+    if (bgKind === 'video') renderTheme()
   }
 
   // ---- 启动：默认配色 + 恢复存档 ----
@@ -250,9 +327,17 @@ export function apply(ctx: Ctx) {
       setAmbient({ ...DEFAULT_AMBIENT, ...(saved.ambient as Partial<AmbientState>) })
     }
   }
+  if (saved !== null && (saved.bgKind === 'video' || saved.bgKind === 'image')) {
+    setBgKind(saved.bgKind as 'image' | 'video')
+  }
   void loadBackground().then((bg) => {
-    if (bg !== null && !userTouched) {
+    if (bg !== null && !userTouched && bgKind === 'image') {
       applyBackgroundData(bg)
+    }
+  })
+  void loadVideo().then((video) => {
+    if (video !== null && !userTouched && bgKind === 'video') {
+      applyVideoData(video)
     }
   })
 
@@ -286,6 +371,7 @@ export function apply(ctx: Ctx) {
     const [notice, setNotice] = useState<string>(t('notice.defaultApplied', { name: t('preset.nous') }))
     const [ambient, setAmbientUi] = useState<AmbientState>(ambientState)
     const [bg, setBgUi] = useState<boolean>(bgEnabled)
+    const [bgKindUi, setBgKindUi] = useState<'image' | 'video'>(bgKind)
     const [langTick, setLangTick] = useState<number>(0)
     const [ioText, setIoText] = useState<string>('')
 
@@ -330,6 +416,15 @@ export function apply(ctx: Ctx) {
       }
     }, [])
 
+    useEffect(() => {
+      const listener = (kind: 'image' | 'video') => setBgKindUi(kind)
+      bgKindListeners.push(listener)
+      return () => {
+        const i = bgKindListeners.indexOf(listener)
+        if (i >= 0) bgKindListeners.splice(i, 1)
+      }
+    }, [])
+
     const update = (key: string, value: string) => {
       userTouched = true
       setColors((prev) => ({ ...prev, [key]: value }))
@@ -360,6 +455,14 @@ export function apply(ctx: Ctx) {
       }
       reader.onerror = () => setNotice(t('notice.bgReadError'))
       reader.readAsDataURL(file)
+    }
+
+    const handleVideoFile = (file: File) => {
+      userTouched = true
+      applyVideoData(file)
+      saveVideo(file)
+      persist()
+      setNotice(t('notice.videoApplied'))
     }
 
     const choosePreset = (key: string) => () => {
@@ -571,6 +674,28 @@ export function apply(ctx: Ctx) {
             setNotice(t('notice.bgApplied'))
           },
         }, t('bg.preset.' + key))),
+      ),
+      createElement('div', { className: 'guic-ambient-row' },
+        createElement('span', { className: 'guic-field-label' }, t('bg.video.status')),
+        createElement('span', { className: 'guic-note' }, bgKindUi === 'video' && bg ? t('ambient.on') : t('ambient.off')),
+        createElement('label', { className: 'guic-btn guic-btn-primary' },
+          createElement('input', {
+            type: 'file',
+            accept: 'video/*',
+            style: { display: 'none' },
+            onChange: (ev: any) => {
+              const file = ev.target !== null && ev.target.files !== null && ev.target.files.length > 0 ? ev.target.files[0] : null
+              if (file !== null) handleVideoFile(file)
+            },
+          }),
+          t('bg.video.choose'),
+        ),
+        createElement('button', { className: 'guic-btn', onClick: () => {
+          userTouched = true
+          clearVideoBackground()
+          persist()
+          setNotice(t('notice.bgCleared'))
+        } }, t('bg.video.clear')),
       ),
       createElement('div', { className: 'guic-note' },
         t('bg.note'),
