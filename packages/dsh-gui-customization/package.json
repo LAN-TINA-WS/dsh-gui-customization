@@ -1,6 +1,6 @@
 {
   "name": "dsh-gui-customization",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "DSH theme plugin for the DeepSeek Harness Web UI: Nous Blue palette, ambient glow, dynamic image/video backgrounds. DSH 界面设定插件：配色 / 氛围光 / 动态背景（中英双语）",
   "type": "module",
   "main": "lib/index.js",
