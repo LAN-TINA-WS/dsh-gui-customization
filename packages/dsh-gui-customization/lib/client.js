@@ -1059,7 +1059,7 @@ window.__ModuleLoader__.load({
 			function PluginCard() {
 				return (0, react.createElement)("div", { className: "guic-plugin-card" }, (0, react.createElement)("div", { className: "guic-plugin-name" }, t("plugin.name")), (0, react.createElement)("div", { className: "guic-plugin-desc" }, t("plugin.desc")));
 			}
-			const NAV_ICON_SVG = "<svg viewBox=\"0 0 16 16\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M8 1.8a6.2 6.2 0 1 0 .15 12.4c1.05 0 1.65-.52 1.65-1.24 0-.5-.3-.92-.8-1.18-.5-.28-.82-.6-.82-1.13 0-.9.9-1.35 1.95-1.35 2.05 0 3.72-1.5 3.72-3.72C13.85 3.55 11.3 1.8 8 1.8z\"/><circle cx=\"5.4\" cy=\"5.4\" r=\"1.05\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"10.6\" cy=\"5.4\" r=\"1.05\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"3.7\" cy=\"9.6\" r=\"1.05\" fill=\"currentColor\" stroke=\"none\"/></svg>";
+			const NAV_ICON_SVG = "<svg viewBox=\"0 0 16 16\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M8 2.5a5.5 5.5 0 1 1 0 11a5.5 5.5 0 0 1 0-11z\"/><circle cx=\"5.95\" cy=\"5.95\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"10.05\" cy=\"5.95\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"5.95\" cy=\"10.05\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"10.05\" cy=\"10.05\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/></svg>";
 			function enhanceNavIcon() {
 				if (document.querySelector("[data-guic-nav-icon=\"1\"]") !== null) return;
 				const dialog = document.querySelector("[role=\"dialog\"]");
