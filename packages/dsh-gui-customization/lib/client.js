@@ -545,6 +545,12 @@ window.__ModuleLoader__.load({
 					bgTag = null;
 				}
 				delete document.body.dataset.guicBg;
+				if (bgBlobUrl !== null) {
+					try {
+						URL.revokeObjectURL(bgBlobUrl);
+					} catch {}
+					bgBlobUrl = null;
+				}
 				removeVideoLayer();
 			});
 			function ensureVideoLayer() {
@@ -645,11 +651,18 @@ window.__ModuleLoader__.load({
 					bgOpacity
 				});
 			}
-			function buildBgCss(mime, data) {
+			let bgBlobUrl = null;
+			function base64ToBlob(mime, data) {
+				const bin = atob(data);
+				const bytes = new Uint8Array(bin.length);
+				for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+				return new Blob([bytes], { type: mime });
+			}
+			function buildBgCss(url) {
 				return [
 					"body[data-guic-bg] {",
 					"  background-color: var(--dsw-alias-bg-layer-1) !important;",
-					`  background-image: linear-gradient(color-mix(in srgb, var(--dsw-alias-bg-layer-1) 97%, transparent) 0%, color-mix(in srgb, var(--dsw-alias-bg-layer-1) 93%, transparent) 55%, color-mix(in srgb, var(--dsw-alias-bg-layer-1) 88%, transparent) 100%), ${`url("data:${mime};base64,${data}")`};`,
+					`  background-image: linear-gradient(color-mix(in srgb, var(--dsw-alias-bg-layer-1) 97%, transparent) 0%, color-mix(in srgb, var(--dsw-alias-bg-layer-1) 93%, transparent) 55%, color-mix(in srgb, var(--dsw-alias-bg-layer-1) 88%, transparent) 100%), url("${url}");`,
 					"  background-position: center;",
 					"  background-size: cover;",
 					"  background-attachment: fixed;",
@@ -659,13 +672,24 @@ window.__ModuleLoader__.load({
 			}
 			function applyBackgroundData(bg) {
 				clearVideoBackground();
+				let url;
+				try {
+					const blob = base64ToBlob(bg.mime, bg.data);
+					if (bgBlobUrl !== null) try {
+						URL.revokeObjectURL(bgBlobUrl);
+					} catch {}
+					bgBlobUrl = URL.createObjectURL(blob);
+					url = bgBlobUrl;
+				} catch {
+					url = `data:${bg.mime};base64,${bg.data}`;
+				}
 				if (bgTag === null) {
 					bgTag = document.createElement("style");
 					bgTag.dataset.plugin = "dsh-gui-customization";
 					bgTag.dataset.pluginCss = "guic-bg";
 					document.head.appendChild(bgTag);
 				}
-				bgTag.textContent = buildBgCss(bg.mime, bg.data);
+				bgTag.textContent = buildBgCss(url);
 				document.body.dataset.guicBg = "1";
 				setBg(true);
 				setBgKind("image");
@@ -677,6 +701,12 @@ window.__ModuleLoader__.load({
 					bgTag = null;
 				}
 				delete document.body.dataset.guicBg;
+				if (bgBlobUrl !== null) {
+					try {
+						URL.revokeObjectURL(bgBlobUrl);
+					} catch {}
+					bgBlobUrl = null;
+				}
 				setBg(false);
 				deleteBackground();
 				renderTheme();

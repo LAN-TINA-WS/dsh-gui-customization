@@ -158,6 +158,10 @@ export function apply(ctx: Ctx) {
   ctx.effect(() => () => {
     if (bgTag !== null) { bgTag.remove(); bgTag = null }
     delete document.body.dataset.guicBg
+    if (bgBlobUrl !== null) {
+      try { URL.revokeObjectURL(bgBlobUrl) } catch { /* ignore */ }
+      bgBlobUrl = null
+    }
     removeVideoLayer()
   })
 
@@ -277,13 +281,22 @@ export function apply(ctx: Ctx) {
   }
 
   // ---- 背景图引擎（body 属性正规方案，scrim 随明暗自适应）----
-  function buildBgCss(mime: string, data: string): string {
-    const url = `url("data:${mime};base64,${data}")`
+  // 图片经 Blob URL 呈现（规避浏览器 CSS data URL 约 2MB 长度限制——大图 data URL 会被整体丢弃）
+  let bgBlobUrl: string | null = null
+
+  function base64ToBlob(mime: string, data: string): Blob {
+    const bin = atob(data)
+    const bytes = new Uint8Array(bin.length)
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i)
+    return new Blob([bytes], { type: mime })
+  }
+
+  function buildBgCss(url: string): string {
     const scrim = 'linear-gradient(color-mix(in srgb, var(--dsw-alias-bg-layer-1) 97%, transparent) 0%, color-mix(in srgb, var(--dsw-alias-bg-layer-1) 93%, transparent) 55%, color-mix(in srgb, var(--dsw-alias-bg-layer-1) 88%, transparent) 100%)'
     return [
       'body[data-guic-bg] {',
       '  background-color: var(--dsw-alias-bg-layer-1) !important;',
-      `  background-image: ${scrim}, ${url};`,
+      `  background-image: ${scrim}, url("${url}");`,
       '  background-position: center;',
       '  background-size: cover;',
       '  background-attachment: fixed;',
@@ -295,13 +308,25 @@ export function apply(ctx: Ctx) {
   function applyBackgroundData(bg: BackgroundData) {
     // 互斥：图片与视频背景二选一
     clearVideoBackground()
+    // base64 → Blob URL（大图不受 data URL 长度限制；失败回退 data URL 兜底）
+    let url: string
+    try {
+      const blob = base64ToBlob(bg.mime, bg.data)
+      if (bgBlobUrl !== null) {
+        try { URL.revokeObjectURL(bgBlobUrl) } catch { /* ignore */ }
+      }
+      bgBlobUrl = URL.createObjectURL(blob)
+      url = bgBlobUrl
+    } catch {
+      url = `data:${bg.mime};base64,${bg.data}`
+    }
     if (bgTag === null) {
       bgTag = document.createElement('style')
       bgTag.dataset.plugin = 'dsh-gui-customization'
       bgTag.dataset.pluginCss = 'guic-bg'
       document.head.appendChild(bgTag)
     }
-    bgTag.textContent = buildBgCss(bg.mime, bg.data)
+    bgTag.textContent = buildBgCss(url)
     document.body.dataset.guicBg = '1'
     setBg(true)
     setBgKind('image')
@@ -311,6 +336,10 @@ export function apply(ctx: Ctx) {
   function clearBackground() {
     if (bgTag !== null) { bgTag.remove(); bgTag = null }
     delete document.body.dataset.guicBg
+    if (bgBlobUrl !== null) {
+      try { URL.revokeObjectURL(bgBlobUrl) } catch { /* ignore */ }
+      bgBlobUrl = null
+    }
     setBg(false)
     deleteBackground()
     renderTheme()
