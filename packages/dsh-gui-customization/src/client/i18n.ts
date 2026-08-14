@@ -30,6 +30,14 @@ export const DICT_ZH: Record<string, string> = {
   'field.warn': '警告色',
   'action.applyColors': '应用配色',
 
+  'io.export': '导出',
+  'io.import': '导入',
+  'io.placeholder': '粘贴配色 JSON 后点「导入」；点「导出」生成 JSON',
+  'io.copied': '配色已复制到剪贴板',
+  'io.exported': '配色已导出到下方文本框',
+  'io.imported': '配色已导入并应用',
+  'io.importFail': '导入失败：JSON 格式或字段无效',
+
   'group.ambient': '氛围光（实时生效）',
   'ambient.on': '已开启',
   'ambient.off': '已关闭',
@@ -91,6 +99,14 @@ export const DICT_EN: Record<string, string> = {
   'field.success': 'Success',
   'field.warn': 'Warning',
   'action.applyColors': 'Apply colors',
+
+  'io.export': 'Export',
+  'io.import': 'Import',
+  'io.placeholder': 'Paste palette JSON then Import; Export generates JSON',
+  'io.copied': 'Palette copied to clipboard',
+  'io.exported': 'Palette exported to the box below',
+  'io.imported': 'Palette imported and applied',
+  'io.importFail': 'Import failed: invalid JSON or fields',
 
   'group.ambient': 'Ambient glow (live)',
   'ambient.on': 'Enabled',

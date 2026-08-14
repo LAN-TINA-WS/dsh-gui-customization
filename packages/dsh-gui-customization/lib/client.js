@@ -283,6 +283,13 @@ window.__ModuleLoader__.load({
 			"field.success": "成功色",
 			"field.warn": "警告色",
 			"action.applyColors": "应用配色",
+			"io.export": "导出",
+			"io.import": "导入",
+			"io.placeholder": "粘贴配色 JSON 后点「导入」；点「导出」生成 JSON",
+			"io.copied": "配色已复制到剪贴板",
+			"io.exported": "配色已导出到下方文本框",
+			"io.imported": "配色已导入并应用",
+			"io.importFail": "导入失败：JSON 格式或字段无效",
 			"group.ambient": "氛围光（实时生效）",
 			"ambient.on": "已开启",
 			"ambient.off": "已关闭",
@@ -338,6 +345,13 @@ window.__ModuleLoader__.load({
 			"field.success": "Success",
 			"field.warn": "Warning",
 			"action.applyColors": "Apply colors",
+			"io.export": "Export",
+			"io.import": "Import",
+			"io.placeholder": "Paste palette JSON then Import; Export generates JSON",
+			"io.copied": "Palette copied to clipboard",
+			"io.exported": "Palette exported to the box below",
+			"io.imported": "Palette imported and applied",
+			"io.importFail": "Import failed: invalid JSON or fields",
 			"group.ambient": "Ambient glow (live)",
 			"ambient.on": "Enabled",
 			"ambient.off": "Disabled",
@@ -611,6 +625,7 @@ window.__ModuleLoader__.load({
 				const [ambient, setAmbientUi] = (0, react.useState)(ambientState);
 				const [bg, setBgUi] = (0, react.useState)(bgEnabled);
 				const [langTick, setLangTick] = (0, react.useState)(0);
+				const [ioText, setIoText] = (0, react.useState)("");
 				(0, react.useEffect)(() => {
 					if (locale === void 0) return;
 					return locale.subscribe(() => setLangTick((x) => x + 1));
@@ -714,6 +729,46 @@ window.__ModuleLoader__.load({
 					setActivePreset("");
 					setNotice(t("notice.customApplied"));
 				};
+				const doExport = () => {
+					userTouched = true;
+					const text = JSON.stringify({
+						colors,
+						brandDark,
+						ambient: ambientState
+					}, null, 2);
+					setIoText(text);
+					if (typeof navigator !== "undefined" && navigator.clipboard !== void 0 && typeof navigator.clipboard.writeText === "function") navigator.clipboard.writeText(text).then(() => setNotice(t("io.copied")), () => setNotice(t("io.exported")));
+					else setNotice(t("io.exported"));
+				};
+				const doImport = () => {
+					userTouched = true;
+					let parsed;
+					try {
+						parsed = JSON.parse(ioText);
+					} catch {
+						setNotice(t("io.importFail"));
+						return;
+					}
+					if (parsed === null || typeof parsed !== "object" || parsed.colors === null || typeof parsed.colors !== "object") {
+						setNotice(t("io.importFail"));
+						return;
+					}
+					const newColors = parsed.colors;
+					const merged = { ...colors };
+					for (const key in TOKEN_KEYS) if (typeof newColors[key] === "string" && newColors[key] !== "") merged[key] = newColors[key];
+					const newBrandDark = typeof parsed.brandDark === "string" && parsed.brandDark !== "" ? parsed.brandDark : brandDark;
+					const newAmbient = parsed.ambient !== null && typeof parsed.ambient === "object" ? {
+						...DEFAULT_AMBIENT,
+						...parsed.ambient
+					} : ambientState;
+					setColors(merged);
+					setBrandDark(newBrandDark);
+					setAmbient(newAmbient);
+					applyColors(merged, newBrandDark);
+					persist();
+					setActivePreset("");
+					setNotice(t("io.imported"));
+				};
 				return (0, react.createElement)("div", { className: "guic-panel" }, (0, react.createElement)("div", { className: "guic-h" }, t("group.presets")), (0, react.createElement)("div", { className: "guic-presets" }, PRESET_ORDER.map((key) => (0, react.createElement)("button", {
 					key,
 					className: activePreset === key ? "guic-preset guic-preset-active" : "guic-preset",
@@ -738,7 +793,26 @@ window.__ModuleLoader__.load({
 				})), (0, react.createElement)("div", { className: "guic-actions" }, (0, react.createElement)("button", {
 					className: "guic-btn guic-btn-primary",
 					onClick: applyCustom
-				}, t("action.applyColors"))), (0, react.createElement)("div", { className: "guic-h" }, t("group.ambient")), (0, react.createElement)("div", { className: "guic-ambient-row" }, (0, react.createElement)("button", {
+				}, t("action.applyColors")), (0, react.createElement)("button", {
+					className: "guic-btn",
+					onClick: doExport
+				}, t("io.export")), (0, react.createElement)("button", {
+					className: "guic-btn",
+					onClick: doImport
+				}, t("io.import"))), (0, react.createElement)("div", { className: "guic-ambient-row" }, (0, react.createElement)("textarea", {
+					className: "guic-field-text",
+					rows: 4,
+					value: ioText,
+					onChange: (ev) => setIoText(String(ev.target.value)),
+					placeholder: t("io.placeholder"),
+					style: {
+						width: "100%",
+						minHeight: "64px",
+						resize: "vertical",
+						fontFamily: "monospace",
+						fontSize: "11px"
+					}
+				})), (0, react.createElement)("div", { className: "guic-h" }, t("group.ambient")), (0, react.createElement)("div", { className: "guic-ambient-row" }, (0, react.createElement)("button", {
 					className: ambient.enabled ? "guic-btn guic-btn-primary" : "guic-btn",
 					onClick: () => updateAmbient({ enabled: !ambient.enabled })
 				}, ambient.enabled ? t("ambient.on") : t("ambient.off")), (0, react.createElement)("label", { className: "guic-check" }, (0, react.createElement)("input", {

@@ -287,6 +287,7 @@ export function apply(ctx: Ctx) {
     const [ambient, setAmbientUi] = useState<AmbientState>(ambientState)
     const [bg, setBgUi] = useState<boolean>(bgEnabled)
     const [langTick, setLangTick] = useState<number>(0)
+    const [ioText, setIoText] = useState<string>('')
 
     useEffect(() => {
       if (locale === undefined) return
@@ -399,6 +400,51 @@ export function apply(ctx: Ctx) {
       setNotice(t('notice.customApplied'))
     }
 
+    const doExport = () => {
+      userTouched = true
+      const text = JSON.stringify({ colors, brandDark, ambient: ambientState }, null, 2)
+      setIoText(text)
+      if (typeof navigator !== 'undefined' && navigator.clipboard !== undefined && typeof navigator.clipboard.writeText === 'function') {
+        navigator.clipboard.writeText(text).then(
+          () => setNotice(t('io.copied')),
+          () => setNotice(t('io.exported')),
+        )
+      } else {
+        setNotice(t('io.exported'))
+      }
+    }
+
+    const doImport = () => {
+      userTouched = true
+      let parsed: Record<string, unknown>
+      try {
+        parsed = JSON.parse(ioText)
+      } catch {
+        setNotice(t('io.importFail'))
+        return
+      }
+      if (parsed === null || typeof parsed !== 'object' || parsed.colors === null || typeof parsed.colors !== 'object') {
+        setNotice(t('io.importFail'))
+        return
+      }
+      const newColors = parsed.colors as Record<string, string>
+      const merged: Record<string, string> = { ...colors }
+      for (const key in TOKEN_KEYS) {
+        if (typeof newColors[key] === 'string' && newColors[key] !== '') merged[key] = newColors[key]
+      }
+      const newBrandDark = (typeof parsed.brandDark === 'string' && parsed.brandDark !== '') ? parsed.brandDark : brandDark
+      const newAmbient: AmbientState = (parsed.ambient !== null && typeof parsed.ambient === 'object')
+        ? { ...DEFAULT_AMBIENT, ...(parsed.ambient as Partial<AmbientState>) }
+        : ambientState
+      setColors(merged)
+      setBrandDark(newBrandDark)
+      setAmbient(newAmbient)
+      applyColors(merged, newBrandDark)
+      persist()
+      setActivePreset('')
+      setNotice(t('io.imported'))
+    }
+
     return createElement('div', { className: 'guic-panel' },
       createElement('div', { className: 'guic-h' }, t('group.presets')),
       createElement('div', { className: 'guic-presets' },
@@ -432,6 +478,18 @@ export function apply(ctx: Ctx) {
       ),
       createElement('div', { className: 'guic-actions' },
         createElement('button', { className: 'guic-btn guic-btn-primary', onClick: applyCustom }, t('action.applyColors')),
+        createElement('button', { className: 'guic-btn', onClick: doExport }, t('io.export')),
+        createElement('button', { className: 'guic-btn', onClick: doImport }, t('io.import')),
+      ),
+      createElement('div', { className: 'guic-ambient-row' },
+        createElement('textarea', {
+          className: 'guic-field-text',
+          rows: 4,
+          value: ioText,
+          onChange: (ev: any) => setIoText(String(ev.target.value)),
+          placeholder: t('io.placeholder'),
+          style: { width: '100%', minHeight: '64px', resize: 'vertical', fontFamily: 'monospace', fontSize: '11px' },
+        }),
       ),
       createElement('div', { className: 'guic-h' }, t('group.ambient')),
       createElement('div', { className: 'guic-ambient-row' },
