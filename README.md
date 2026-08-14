@@ -2,6 +2,12 @@
 
 中文 | [English](README.en.md)
 
+## dsh-gui-customization
+
+DeepSeek Harness Web UI 的**主题定制插件**：Nous 蓝默认配色（明暗双模式）、四套预设与 13 色自定义、氛围光（光晕/呼吸/位置实时可调）、背景图（原生文件选择 + 内置预设「deepseek娘01」），中英双语、设置持久化、跨重启保留。配置入口：设置 → 界面设定。
+
+> 📦 [最新 Release](https://github.com/LAN-TINA-WS/dsh-gui-customization/releases/latest) · 🏷️ [dsh-plugin 生态](https://github.com/topics/dsh-plugin) · 安装：`dsh plugin --profile web add link:<目录>`（见「快速开始 → 发布轨」）
+
 基于 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（DSH）的插件开发项目：以**动态 Cordis 插件**快速迭代创意，以**组合插件**发布稳定成品。当前首个成品 **GUICustomization**（界面设定）已上线运行。
 
 ## ✨ 成品展示：GUICustomization

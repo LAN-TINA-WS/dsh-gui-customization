@@ -2,6 +2,12 @@
 
 [中文](README.md) | English
 
+## dsh-gui-customization
+
+A **theme customization plugin** for the DeepSeek Harness Web UI: default Nous Blue palette (light/dark), four presets and 13 custom colors, ambient glow (halo/breathing/position, live), background image (native file picker + built-in preset "DeepSeek Girl 01"), bilingual Chinese/English UI, persistent settings that survive restarts. Config entry: Settings → Interface Settings.
+
+> 📦 [Latest Release](https://github.com/LAN-TINA-WS/dsh-gui-customization/releases/latest) · 🏷️ [dsh-plugin ecosystem](https://github.com/topics/dsh-plugin) · Install: `dsh plugin --profile web add link:<dir>` (see "Quick Start → Release track")
+
 A plugin development project on top of [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (DSH): ideas are iterated fast as **dynamic Cordis plugins**, and shipped stable as **composition plugins**. The first product, **GUICustomization** (Interface Settings), is live.
 
 ## ✨ Featured: GUICustomization
