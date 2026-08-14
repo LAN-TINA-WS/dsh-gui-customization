@@ -17,6 +17,7 @@ import {
   loadBackground, saveBackground, deleteBackground, BackgroundData,
 } from './store'
 import { DICT_ZH, DICT_EN } from './i18n'
+import { PRESET_BACKGROUNDS } from './assets.generated'
 
 interface Ctx {
   get(name: string): unknown
@@ -496,6 +497,22 @@ export function apply(ctx: Ctx) {
           t('bg.choose'),
         ),
         createElement('button', { className: 'guic-btn', onClick: clearBackground }, t('bg.clear')),
+      ),
+      createElement('div', { className: 'guic-ambient-row' },
+        createElement('span', { className: 'guic-field-label' }, t('bg.preset')),
+        Object.keys(PRESET_BACKGROUNDS).map((key) => createElement('button', {
+          key,
+          className: 'guic-preset',
+          onClick: () => {
+            const bgData = PRESET_BACKGROUNDS[key]
+            if (bgData === undefined) return
+            userTouched = true
+            applyBackgroundData(bgData)
+            saveBackground(bgData)
+            persist()
+            setNotice(t('notice.bgApplied'))
+          },
+        }, t('bg.preset.' + key))),
       ),
       createElement('div', { className: 'guic-note' },
         t('bg.note'),

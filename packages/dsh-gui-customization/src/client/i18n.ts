@@ -47,6 +47,8 @@ export const DICT_ZH: Record<string, string> = {
   'bg.status': '状态',
   'bg.choose': '选择图片文件…',
   'bg.clear': '清除背景图',
+  'bg.preset': '预设背景',
+  'bg.preset.image2': 'deepseek娘01',
   'bg.note': '开启后对话主区大幅透出图片（底色降至 30% 不透明），卡片与侧栏轻微透图，遮罩随明暗自适应；图片数据存于浏览器 IndexedDB，刷新与重启后自动恢复。',
 
   'notice.defaultApplied': '默认「{name}」配色已应用',
@@ -107,6 +109,8 @@ export const DICT_EN: Record<string, string> = {
   'bg.status': 'Status',
   'bg.choose': 'Choose image file…',
   'bg.clear': 'Remove background',
+  'bg.preset': 'Preset backgrounds',
+  'bg.preset.image2': 'DeepSeek Girl 01',
   'bg.note': 'When enabled the conversation area shows the image (base surface drops to 30% opacity), cards and sidebar stay slightly translucent, and the scrim adapts to light/dark. Image data is kept in browser IndexedDB and restored across refreshes and restarts.',
 
   'notice.defaultApplied': 'Default “{name}” palette applied',
