@@ -19,11 +19,12 @@
     }
   },
   "scripts": {
-    "build": "tsdown"
+    "build": "node scripts/embed-assets.mjs && tsdown"
   },
   "files": [
     "lib",
-    "cordis.patch.yml"
+    "cordis.patch.yml",
+    "assets"
   ],
   "license": "MIT"
 }
