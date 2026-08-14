@@ -1,6 +1,6 @@
 {
   "name": "dsh-gui-customization",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "CORE 界面设定插件：Nous 蓝默认配色、预设与自定义 13 色、氛围光（光晕/呼吸/位置）、背景图（文件选择对话框）、localStorage+IndexedDB 持久化",
   "type": "module",
   "main": "lib/index.js",
