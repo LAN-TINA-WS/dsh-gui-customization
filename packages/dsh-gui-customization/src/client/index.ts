@@ -133,6 +133,8 @@ export function apply(ctx: Ctx) {
   let videoUrl: string | null = null
   const bgListeners: Array<(enabled: boolean) => void> = []
   const bgKindListeners: Array<(kind: 'image' | 'video') => void> = []
+  let bgSidebarTransparent = false
+  const sidebarTransparentListeners: Array<(value: boolean) => void> = []
   function setBg(enabled: boolean) {
     bgEnabled = enabled
     bgListeners.slice().forEach((fn) => fn(enabled))
@@ -140,6 +142,11 @@ export function apply(ctx: Ctx) {
   function setBgKind(kind: 'image' | 'video') {
     bgKind = kind
     bgKindListeners.slice().forEach((fn) => fn(kind))
+  }
+  function setBgSidebarTransparent(value: boolean) {
+    bgSidebarTransparent = value
+    sidebarTransparentListeners.slice().forEach((fn) => fn(value))
+    renderTheme()
   }
   ctx.effect(() => () => {
     if (bgTag !== null) { bgTag.remove(); bgTag = null }
@@ -218,7 +225,12 @@ export function apply(ctx: Ctx) {
   function translucent(colors: Record<string, string>): Record<string, string> {
     const next = { ...colors }
     for (const key in BG_FACE_ALPHA) {
-      next[key] = withAlpha(next[key] ?? '', BG_FACE_ALPHA[key])
+      if (key === 'sidebar') {
+        // 侧边栏透明度由用户开关控制：透明 0.55 / 非透明保持原值
+        next[key] = bgSidebarTransparent ? withAlpha(next[key] ?? '', 0.55) : (next[key] ?? '')
+      } else {
+        next[key] = withAlpha(next[key] ?? '', BG_FACE_ALPHA[key])
+      }
     }
     return next
   }
@@ -251,7 +263,7 @@ export function apply(ctx: Ctx) {
   }
 
   function persist() {
-    saveSettings({ colors: currentColors, brandDark: currentBrandDark, ambient: ambientState, bgKind })
+    saveSettings({ colors: currentColors, brandDark: currentBrandDark, ambient: ambientState, bgKind, bgSidebarTransparent })
   }
 
   // ---- 背景图引擎（body 属性正规方案，scrim 随明暗自适应）----
@@ -330,6 +342,9 @@ export function apply(ctx: Ctx) {
   if (saved !== null && (saved.bgKind === 'video' || saved.bgKind === 'image')) {
     setBgKind(saved.bgKind as 'image' | 'video')
   }
+  if (saved !== null && saved.bgSidebarTransparent === true) {
+    setBgSidebarTransparent(true)
+  }
   void loadBackground().then((bg) => {
     if (bg !== null && !userTouched && bgKind === 'image') {
       applyBackgroundData(bg)
@@ -372,6 +387,7 @@ export function apply(ctx: Ctx) {
     const [ambient, setAmbientUi] = useState<AmbientState>(ambientState)
     const [bg, setBgUi] = useState<boolean>(bgEnabled)
     const [bgKindUi, setBgKindUi] = useState<'image' | 'video'>(bgKind)
+    const [sidebarTransparentUi, setSidebarTransparentUi] = useState<boolean>(bgSidebarTransparent)
     const [langTick, setLangTick] = useState<number>(0)
     const [ioText, setIoText] = useState<string>('')
 
@@ -422,6 +438,15 @@ export function apply(ctx: Ctx) {
       return () => {
         const i = bgKindListeners.indexOf(listener)
         if (i >= 0) bgKindListeners.splice(i, 1)
+      }
+    }, [])
+
+    useEffect(() => {
+      const listener = (value: boolean) => setSidebarTransparentUi(value)
+      sidebarTransparentListeners.push(listener)
+      return () => {
+        const i = sidebarTransparentListeners.indexOf(listener)
+        if (i >= 0) sidebarTransparentListeners.splice(i, 1)
       }
     }, [])
 
@@ -696,6 +721,20 @@ export function apply(ctx: Ctx) {
           persist()
           setNotice(t('notice.bgCleared'))
         } }, t('bg.video.clear')),
+      ),
+      createElement('div', { className: 'guic-ambient-row' },
+        createElement('label', { className: 'guic-check' },
+          createElement('input', {
+            type: 'checkbox',
+            checked: sidebarTransparentUi,
+            onChange: (ev: any) => {
+              userTouched = true
+              setBgSidebarTransparent(Boolean(ev.target.checked))
+              persist()
+            },
+          }),
+          t('bg.sidebarTransparent'),
+        ),
       ),
       createElement('div', { className: 'guic-note' },
         t('bg.note'),

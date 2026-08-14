@@ -323,6 +323,7 @@ window.__ModuleLoader__.load({
 			"bg.video.status": "视频背景",
 			"bg.video.choose": "选择视频文件…",
 			"bg.video.clear": "清除视频",
+			"bg.sidebarTransparent": "侧边栏透明（背景开启时透出背景）",
 			"bg.note": "开启后对话主区大幅透出图片（底色降至 30% 不透明），卡片与侧栏轻微透图，遮罩随明暗自适应；图片数据存于浏览器 IndexedDB，刷新与重启后自动恢复。",
 			"notice.defaultApplied": "默认「{name}」配色已应用",
 			"notice.loaded": "已加载保存的配色",
@@ -389,6 +390,7 @@ window.__ModuleLoader__.load({
 			"bg.video.status": "Video background",
 			"bg.video.choose": "Choose video file…",
 			"bg.video.clear": "Remove video",
+			"bg.sidebarTransparent": "Transparent sidebar (shows backdrop when background is on)",
 			"bg.note": "When enabled the conversation area shows the image (base surface drops to 30% opacity), cards and sidebar stay slightly translucent, and the scrim adapts to light/dark. Image data is kept in browser IndexedDB and restored across refreshes and restarts.",
 			"notice.defaultApplied": "Default “{name}” palette applied",
 			"notice.loaded": "Saved palette loaded",
@@ -513,6 +515,8 @@ window.__ModuleLoader__.load({
 			let videoUrl = null;
 			const bgListeners = [];
 			const bgKindListeners = [];
+			let bgSidebarTransparent = false;
+			const sidebarTransparentListeners = [];
 			function setBg(enabled) {
 				bgEnabled = enabled;
 				bgListeners.slice().forEach((fn) => fn(enabled));
@@ -520,6 +524,11 @@ window.__ModuleLoader__.load({
 			function setBgKind(kind) {
 				bgKind = kind;
 				bgKindListeners.slice().forEach((fn) => fn(kind));
+			}
+			function setBgSidebarTransparent(value) {
+				bgSidebarTransparent = value;
+				sidebarTransparentListeners.slice().forEach((fn) => fn(value));
+				renderTheme();
 			}
 			ctx.effect(() => () => {
 				if (bgTag !== null) {
@@ -593,7 +602,8 @@ window.__ModuleLoader__.load({
 			}
 			function translucent(colors) {
 				const next = { ...colors };
-				for (const key in BG_FACE_ALPHA) next[key] = withAlpha(next[key] ?? "", BG_FACE_ALPHA[key]);
+				for (const key in BG_FACE_ALPHA) if (key === "sidebar") next[key] = bgSidebarTransparent ? withAlpha(next[key] ?? "", .55) : next[key] ?? "";
+				else next[key] = withAlpha(next[key] ?? "", BG_FACE_ALPHA[key]);
 				return next;
 			}
 			function readProductTokens() {
@@ -620,7 +630,8 @@ window.__ModuleLoader__.load({
 					colors: currentColors,
 					brandDark: currentBrandDark,
 					ambient: ambientState,
-					bgKind
+					bgKind,
+					bgSidebarTransparent
 				});
 			}
 			function buildBgCss(mime, data) {
@@ -689,6 +700,7 @@ window.__ModuleLoader__.load({
 				});
 			}
 			if (saved !== null && (saved.bgKind === "video" || saved.bgKind === "image")) setBgKind(saved.bgKind);
+			if (saved !== null && saved.bgSidebarTransparent === true) setBgSidebarTransparent(true);
 			loadBackground().then((bg) => {
 				if (bg !== null && !userTouched && bgKind === "image") applyBackgroundData(bg);
 			});
@@ -726,6 +738,7 @@ window.__ModuleLoader__.load({
 				const [ambient, setAmbientUi] = (0, react.useState)(ambientState);
 				const [bg, setBgUi] = (0, react.useState)(bgEnabled);
 				const [bgKindUi, setBgKindUi] = (0, react.useState)(bgKind);
+				const [sidebarTransparentUi, setSidebarTransparentUi] = (0, react.useState)(bgSidebarTransparent);
 				const [langTick, setLangTick] = (0, react.useState)(0);
 				const [ioText, setIoText] = (0, react.useState)("");
 				(0, react.useEffect)(() => {
@@ -769,6 +782,14 @@ window.__ModuleLoader__.load({
 					return () => {
 						const i = bgKindListeners.indexOf(listener);
 						if (i >= 0) bgKindListeners.splice(i, 1);
+					};
+				}, []);
+				(0, react.useEffect)(() => {
+					const listener = (value) => setSidebarTransparentUi(value);
+					sidebarTransparentListeners.push(listener);
+					return () => {
+						const i = sidebarTransparentListeners.indexOf(listener);
+						if (i >= 0) sidebarTransparentListeners.splice(i, 1);
 					};
 				}, []);
 				const update = (key, value) => {
@@ -993,7 +1014,15 @@ window.__ModuleLoader__.load({
 						persist();
 						setNotice(t("notice.bgCleared"));
 					}
-				}, t("bg.video.clear"))), (0, react.createElement)("div", { className: "guic-note" }, t("bg.note")), (0, react.createElement)("div", { className: "guic-notice" }, notice), (0, react.createElement)("div", { className: "guic-note" }, t("hint.persist")));
+				}, t("bg.video.clear"))), (0, react.createElement)("div", { className: "guic-ambient-row" }, (0, react.createElement)("label", { className: "guic-check" }, (0, react.createElement)("input", {
+					type: "checkbox",
+					checked: sidebarTransparentUi,
+					onChange: (ev) => {
+						userTouched = true;
+						setBgSidebarTransparent(Boolean(ev.target.checked));
+						persist();
+					}
+				}), t("bg.sidebarTransparent"))), (0, react.createElement)("div", { className: "guic-note" }, t("bg.note")), (0, react.createElement)("div", { className: "guic-notice" }, notice), (0, react.createElement)("div", { className: "guic-note" }, t("hint.persist")));
 			}
 			function PluginCard() {
 				return (0, react.createElement)("div", { className: "guic-plugin-card" }, (0, react.createElement)("div", { className: "guic-plugin-name" }, t("plugin.name")), (0, react.createElement)("div", { className: "guic-plugin-desc" }, t("plugin.desc")));
