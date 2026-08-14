@@ -1,7 +1,7 @@
 {
   "name": "dsh-gui-customization",
   "version": "0.5.0",
-  "description": "CORE 界面设定插件：Nous 蓝默认配色、预设与自定义 13 色、氛围光（光晕/呼吸/位置）、背景图（文件选择对话框）、localStorage+IndexedDB 持久化",
+  "description": "DSH theme plugin for the DeepSeek Harness Web UI: Nous Blue palette, ambient glow, dynamic image/video backgrounds. DSH 界面设定插件：配色 / 氛围光 / 动态背景（中英双语）",
   "type": "module",
   "main": "lib/index.js",
   "exports": {
@@ -19,7 +19,8 @@
     }
   },
   "scripts": {
-    "build": "node scripts/embed-assets.mjs && tsdown"
+    "build": "node scripts/embed-assets.mjs && tsdown",
+    "prepublishOnly": "npm run build"
   },
   "files": [
     "lib",
@@ -27,5 +28,24 @@
     "assets",
     "LICENSE"
   ],
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "theme",
+    "skin",
+    "gui",
+    "background",
+    "video"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LAN-TINA-WS/dsh-gui-customization.git",
+    "directory": "packages/dsh-gui-customization"
+  },
+  "homepage": "https://github.com/LAN-TINA-WS/dsh-gui-customization#readme",
+  "bugs": {
+    "url": "https://github.com/LAN-TINA-WS/dsh-gui-customization/issues"
+  },
   "license": "MIT"
 }
