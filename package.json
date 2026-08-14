@@ -1,0 +1,14 @@
+{
+  "name": "core-dsh-plugins",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "CORE — DSH 插件项目：开发轨（plugins/ 动态插件）+ 发布轨（packages/ 组合插件）",
+  "scripts": {
+    "build": "pnpm --filter \"./packages/*\" build"
+  },
+  "devDependencies": {
+    "lightningcss": "^1.32.0",
+    "tsdown": "^0.22.2"
+  }
+}

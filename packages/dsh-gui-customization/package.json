@@ -1,0 +1,29 @@
+{
+  "name": "dsh-gui-customization",
+  "version": "0.1.0",
+  "description": "CORE 界面设定插件：Nous 蓝默认配色、预设与自定义 13 色、氛围光（光晕/呼吸/位置）、背景图（文件选择对话框）、localStorage+IndexedDB 持久化",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [],
+      "platform": "web"
+    }
+  },
+  "scripts": {
+    "build": "tsdown"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml"
+  ],
+  "license": "MIT"
+}

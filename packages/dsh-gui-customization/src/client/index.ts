@@ -1,0 +1,530 @@
+/**
+ * GUICustomization（组合版）— Client 入口。
+ *
+ * 相对动态版（plugins/gui-customization）的能力差异：
+ * - 持久化：localStorage（设置）+ IndexedDB（背景图 base64），无需 Host 半与工作区文件
+ * - 背景图：真·文件选择对话框（input[type=file] + FileReader）+ body 属性正规方案
+ *   （body[data-guic-bg] 属性选择器，scrim 用主题变量随明暗自适应）→ 主区真正透图
+ * - 插件配置区识别：注册 settings.plugin.item 卡片（设置 → 插件）
+ */
+import { createElement, useEffect, useState } from 'react'
+import {
+  SOURCE, TOKEN_KEYS, DARK, PALETTES, PRESET_ORDER, PRESET_LABELS, FIELDS,
+  DEFAULT_AMBIENT, POSITION_ORDER, POSITION_LABELS, BG_FACE_ALPHA, AmbientState,
+} from './constants'
+import {
+  loadSettings, saveSettings, clearSettings,
+  loadBackground, saveBackground, deleteBackground, BackgroundData,
+} from './store'
+import { DICT_ZH, DICT_EN } from './i18n'
+
+interface Ctx {
+  get(name: string): unknown
+  effect(fn: () => (() => void) | void): void
+}
+interface ThemeService {
+  overrideTokens(source: string, tokens: Record<string, { light: string; dark: string }>): () => void
+}
+interface SlotsService {
+  inject(key: string, cb: () => void): () => void
+  register(options: Record<string, unknown>, render: (props: any) => unknown): unknown
+}
+interface LocaleService {
+  register(ns: string, localeTag: string, dict: Record<string, string>): () => void
+  bind(ns: string): (key: string) => string
+  subscribe(fn: () => void): () => void
+}
+
+const MAIN_CSS = `
+  .guic-panel { display: flex; flex-direction: column; gap: 14px; padding: 4px 0 16px; }
+  .guic-h { font-size: 13px; font-weight: 600; color: var(--dsw-alias-label-secondary); }
+  .guic-presets { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .guic-preset { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-layer-1); color: var(--dsw-alias-label-primary); cursor: pointer; font-size: 13px; }
+  .guic-preset:hover { border-color: var(--dsw-alias-brand-primary); }
+  .guic-preset-active { border-color: var(--dsw-alias-brand-primary); background: var(--dsw-alias-bg-layer-2); }
+  .guic-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; }
+  .guic-field { display: flex; align-items: center; gap: 8px; }
+  .guic-field-label { width: 60px; flex: none; font-size: 12px; color: var(--dsw-alias-label-secondary); }
+  .guic-field-color { width: 34px; height: 26px; padding: 0; border: 1px solid var(--dsw-alias-border-l1); border-radius: 6px; background: none; cursor: pointer; }
+  .guic-field-text { flex: 1; min-width: 0; padding: 4px 8px; font-size: 12px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 6px; background: var(--dsw-alias-bg-layer-1); color: var(--dsw-alias-label-primary); }
+  .guic-actions { display: flex; gap: 8px; }
+  .guic-btn { padding: 6px 14px; border-radius: 8px; border: 1px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-layer-1); color: var(--dsw-alias-label-primary); cursor: pointer; font-size: 13px; }
+  .guic-btn:hover { border-color: var(--dsw-alias-brand-primary); }
+  .guic-btn-primary { background: var(--dsw-alias-brand-primary); border-color: var(--dsw-alias-brand-primary); color: #FFFFFF; }
+  .guic-notice { font-size: 12px; color: var(--dsw-alias-brand-primary); }
+  .guic-note { font-size: 12px; color: var(--dsw-alias-label-secondary); line-height: 1.6; }
+
+  .guic-ambient { position: fixed; inset: 0; pointer-events: none; }
+  .guic-ambient::before, .guic-ambient::after { content: ''; position: fixed; width: 55vmax; height: 55vmax; border-radius: 50%; filter: blur(50px); }
+  .guic-ambient::before { top: -18vmax; right: -14vmax; background: radial-gradient(circle, color-mix(in srgb, var(--dsw-alias-brand-primary) calc(var(--guic-strength, 8) * 1%), transparent) 0%, transparent 70%); }
+  .guic-ambient::after { bottom: -20vmax; left: -16vmax; background: radial-gradient(circle, color-mix(in srgb, var(--dsw-alias-brand-primary) calc(var(--guic-strength, 8) * 0.7%), transparent) 0%, transparent 70%); }
+  .guic-ambient-breathe::before { animation: guic-breathe 8s ease-in-out infinite; }
+  .guic-ambient-breathe::after { animation: guic-breathe 10s ease-in-out infinite reverse; }
+  @keyframes guic-breathe { 0%, 100% { opacity: var(--guic-breathe-min, 0.6); } 50% { opacity: 1; } }
+  .guic-ambient-pos-tl-br::before { top: -18vmax; right: auto; left: -14vmax; }
+  .guic-ambient-pos-tl-br::after { bottom: -20vmax; left: auto; right: -16vmax; }
+  .guic-ambient-pos-top::before { top: -24vmax; right: auto; left: 12vw; }
+  .guic-ambient-pos-top::after { top: -24vmax; left: auto; right: 12vw; bottom: auto; }
+  .guic-ambient-pos-bottom::before { bottom: -26vmax; top: auto; right: auto; left: 10vw; }
+  .guic-ambient-pos-bottom::after { bottom: -26vmax; top: auto; left: auto; right: 10vw; }
+  .guic-ambient-pos-center::before { top: 50%; left: 50%; right: auto; bottom: auto; transform: translate(-50%, -50%); width: 85vmax; height: 85vmax; }
+  .guic-ambient-pos-center::after { display: none; }
+
+  .guic-ambient-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .guic-check { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--dsw-alias-label-secondary); cursor: pointer; }
+  .guic-range { flex: 1; min-width: 100px; accent-color: var(--dsw-alias-brand-primary); }
+
+  .guic-plugin-card { padding: 12px 14px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 10px; background: var(--dsw-alias-bg-layer-1); }
+  .guic-plugin-name { font-size: 13px; font-weight: 600; color: var(--dsw-alias-label-primary); }
+  .guic-plugin-desc { margin-top: 4px; font-size: 12px; color: var(--dsw-alias-label-secondary); line-height: 1.6; }
+`
+
+export function apply(ctx: Ctx) {
+  const theme = ctx.get('theme') as ThemeService | undefined
+  const slots = ctx.get('slots') as SlotsService | undefined
+  if (theme === undefined || slots === undefined) return
+
+  // 双语字典：注册进 locale 服务，t() 读当前语言；占位符 {name} 自行插值
+  const locale = ctx.get('locale') as LocaleService | undefined
+  let localeActiveLang: () => string = () => 'zh'
+  if (locale !== undefined) {
+    locale.register('gui-customization', 'zh', DICT_ZH)
+    locale.register('gui-customization', 'en', DICT_EN)
+    const localeAny = locale as unknown as { getLocale?: () => { active: string } }
+    localeActiveLang = () => (localeAny.getLocale !== undefined ? localeAny.getLocale().active : 'zh')
+  }
+  const t = (key: string, vars?: Record<string, string | number>): string => {
+    const en = DICT_EN[key]
+    const template = (localeActiveLang() === 'en' && en !== undefined) ? en : (DICT_ZH[key] ?? key)
+    if (vars === undefined) return template
+    return template.replace(/\{(\w+)\}/g, (_, name: string) => String(vars[name] ?? ''))
+  }
+
+  // 全局样式注入（组合版完整浏览器环境；ctx.effect 随插件卸载撤除）
+  const mainTag = document.createElement('style')
+  mainTag.dataset.plugin = 'dsh-gui-customization'
+  mainTag.dataset.pluginCss = 'guic-main'
+  mainTag.textContent = MAIN_CSS
+  document.head.appendChild(mainTag)
+  ctx.effect(() => () => { mainTag.remove() })
+
+  // ---- 运行态状态（apply 闭包：面板与氛围层共享）----
+  let activeLayer: (() => void) | null = null
+  let currentColors: Record<string, string> = PALETTES.nous.light
+  let currentBrandDark: string = PALETTES.nous.brandDark
+  let userTouched = false
+  let savedState: Record<string, unknown> | null = null
+  const syncListeners: Array<() => void> = []
+
+  let ambientState: AmbientState = { ...DEFAULT_AMBIENT }
+  const ambientListeners: Array<(s: AmbientState) => void> = []
+  function setAmbient(next: Partial<AmbientState>) {
+    ambientState = { ...ambientState, ...next }
+    ambientListeners.slice().forEach((fn) => fn(ambientState))
+  }
+
+  let bgEnabled = false
+  let bgTag: HTMLStyleElement | null = null
+  const bgListeners: Array<(enabled: boolean) => void> = []
+  function setBg(enabled: boolean) {
+    bgEnabled = enabled
+    bgListeners.slice().forEach((fn) => fn(enabled))
+  }
+  ctx.effect(() => () => {
+    if (bgTag !== null) { bgTag.remove(); bgTag = null }
+    delete document.body.dataset.guicBg
+  })
+
+  // ---- 主题引擎 ----
+  function buildTokens(light: Record<string, string>, brandDark: string): Record<string, { light: string; dark: string }> {
+    const dark: Record<string, string> = { ...DARK }
+    dark['brand-primary'] = brandDark
+    const tokens: Record<string, { light: string; dark: string }> = {}
+    for (const key in TOKEN_KEYS) {
+      tokens[TOKEN_KEYS[key]] = { light: light[key] ?? '', dark: dark[key] ?? '' }
+    }
+    return tokens
+  }
+
+  // hex / rgb() / rgba() → rgba(…, alpha)（其他格式原样返回）
+  function withAlpha(value: string, alpha: number): string {
+    const hex = /^#([0-9a-fA-F]{6})$/.exec(String(value))
+    if (hex) {
+      const r = parseInt(hex[1].slice(0, 2), 16)
+      const g = parseInt(hex[1].slice(2, 4), 16)
+      const b = parseInt(hex[1].slice(4, 6), 16)
+      return `rgba(${r},${g},${b},${alpha})`
+    }
+    const rgb = /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*[\d.]+\s*)?\)$/.exec(String(value))
+    if (rgb) {
+      return `rgba(${rgb[1]},${rgb[2]},${rgb[3]},${alpha})`
+    }
+    return value
+  }
+
+  function translucent(colors: Record<string, string>): Record<string, string> {
+    const next = { ...colors }
+    for (const key in BG_FACE_ALPHA) {
+      next[key] = withAlpha(next[key] ?? '', BG_FACE_ALPHA[key])
+    }
+    return next
+  }
+
+  // 撤销覆盖层后，从 body 计算值读回产品默认令牌值（DSH 主题变量定义在 body 上，
+  // 供「系统默认+背景图」重建半透明层）
+  function readProductTokens(): Record<string, string> {
+    const style = getComputedStyle(document.body)
+    const tokens: Record<string, string> = {}
+    for (const key in TOKEN_KEYS) {
+      const value = style.getPropertyValue(TOKEN_KEYS[key]).trim()
+      if (value !== '') tokens[key] = value
+    }
+    // 读取失败（空）时回退 Nous 蓝默认，保证背景图下总有半透明层
+    if (tokens['bg-base'] === undefined) {
+      return { ...PALETTES.nous.light }
+    }
+    return tokens
+  }
+
+  function renderTheme() {
+    const light = bgEnabled ? translucent(currentColors) : currentColors
+    activeLayer = theme.overrideTokens(SOURCE, buildTokens(light, currentBrandDark))
+  }
+
+  function applyColors(light: Record<string, string>, brandDark: string) {
+    currentColors = light
+    currentBrandDark = brandDark
+    renderTheme()
+  }
+
+  function persist() {
+    saveSettings({ colors: currentColors, brandDark: currentBrandDark, ambient: ambientState })
+  }
+
+  // ---- 背景图引擎（body 属性正规方案，scrim 随明暗自适应）----
+  function buildBgCss(mime: string, data: string): string {
+    const url = `url("data:${mime};base64,${data}")`
+    const scrim = 'linear-gradient(color-mix(in srgb, var(--dsw-alias-bg-layer-1) 97%, transparent) 0%, color-mix(in srgb, var(--dsw-alias-bg-layer-1) 93%, transparent) 55%, color-mix(in srgb, var(--dsw-alias-bg-layer-1) 88%, transparent) 100%)'
+    return [
+      'body[data-guic-bg] {',
+      '  background-color: var(--dsw-alias-bg-layer-1) !important;',
+      `  background-image: ${scrim}, ${url};`,
+      '  background-position: center;',
+      '  background-size: cover;',
+      '  background-attachment: fixed;',
+      '  background-repeat: no-repeat;',
+      '}',
+    ].join('\n')
+  }
+
+  function applyBackgroundData(bg: BackgroundData) {
+    if (bgTag === null) {
+      bgTag = document.createElement('style')
+      bgTag.dataset.plugin = 'dsh-gui-customization'
+      bgTag.dataset.pluginCss = 'guic-bg'
+      document.head.appendChild(bgTag)
+    }
+    bgTag.textContent = buildBgCss(bg.mime, bg.data)
+    document.body.dataset.guicBg = '1'
+    setBg(true)
+    renderTheme()
+  }
+
+  function clearBackground() {
+    if (bgTag !== null) { bgTag.remove(); bgTag = null }
+    delete document.body.dataset.guicBg
+    setBg(false)
+    deleteBackground()
+    renderTheme()
+  }
+
+  // ---- 启动：默认配色 + 恢复存档 ----
+  applyColors(PALETTES.nous.light, PALETTES.nous.brandDark)
+
+  const saved = loadSettings()
+  if (saved !== null && saved.colors !== undefined && typeof saved.colors === 'object') {
+    savedState = saved
+    applyColors(saved.colors as Record<string, string>, (saved.brandDark as string) || PALETTES.nous.brandDark)
+    if (saved.ambient !== undefined && typeof saved.ambient === 'object') {
+      setAmbient({ ...DEFAULT_AMBIENT, ...(saved.ambient as Partial<AmbientState>) })
+    }
+  }
+  void loadBackground().then((bg) => {
+    if (bg !== null && !userTouched) {
+      applyBackgroundData(bg)
+    }
+  })
+
+  // ---- 组件 ----
+  function AmbientLayer() {
+    const [state, setState] = useState<AmbientState>(ambientState)
+    useEffect(() => {
+      const listener = (next: AmbientState) => setState({ ...next })
+      ambientListeners.push(listener)
+      return () => {
+        const i = ambientListeners.indexOf(listener)
+        if (i >= 0) ambientListeners.splice(i, 1)
+      }
+    }, [])
+    if (!state.enabled) return null
+    const position = POSITION_LABELS[state.position] !== undefined ? state.position : 'tr-bl'
+    const cls = `guic-ambient guic-ambient-pos-${position}${state.breathe ? ' guic-ambient-breathe' : ''}`
+    const strength = Math.min(100, Math.max(0, Math.round(state.strength * 100)))
+    const amp = Math.min(1, Math.max(0, Number(state.breatheAmp) || 0))
+    const breatheMin = Math.round((1 - amp * 0.45) * 100) / 100
+    return createElement('div', {
+      className: cls,
+      style: { '--guic-strength': String(strength), '--guic-breathe-min': String(breatheMin) },
+    })
+  }
+
+  function GuiPanel() {
+    const [colors, setColors] = useState<Record<string, string>>(PALETTES.nous.light)
+    const [brandDark, setBrandDark] = useState<string>(PALETTES.nous.brandDark)
+    const [activePreset, setActivePreset] = useState<string>('nous')
+    const [notice, setNotice] = useState<string>(t('notice.defaultApplied', { name: t('preset.nous') }))
+    const [ambient, setAmbientUi] = useState<AmbientState>(ambientState)
+    const [bg, setBgUi] = useState<boolean>(bgEnabled)
+    const [langTick, setLangTick] = useState<number>(0)
+
+    useEffect(() => {
+      if (locale === undefined) return
+      const off = locale.subscribe(() => setLangTick((x) => x + 1))
+      return off
+    }, [])
+    void langTick
+
+    useEffect(() => {
+      const sync = () => {
+        if (savedState === null || userTouched) return
+        setColors(savedState.colors as Record<string, string>)
+        setBrandDark((savedState.brandDark as string) || PALETTES.nous.brandDark)
+        setActivePreset(null as unknown as string)
+        setNotice(t('notice.loaded'))
+      }
+      syncListeners.push(sync)
+      sync()
+      return () => {
+        const i = syncListeners.indexOf(sync)
+        if (i >= 0) syncListeners.splice(i, 1)
+      }
+    }, [])
+
+    useEffect(() => {
+      const listener = (next: AmbientState) => setAmbientUi({ ...next })
+      ambientListeners.push(listener)
+      return () => {
+        const i = ambientListeners.indexOf(listener)
+        if (i >= 0) ambientListeners.splice(i, 1)
+      }
+    }, [])
+
+    useEffect(() => {
+      const listener = (enabled: boolean) => setBgUi(enabled)
+      bgListeners.push(listener)
+      return () => {
+        const i = bgListeners.indexOf(listener)
+        if (i >= 0) bgListeners.splice(i, 1)
+      }
+    }, [])
+
+    const update = (key: string, value: string) => {
+      userTouched = true
+      setColors((prev) => ({ ...prev, [key]: value }))
+      setActivePreset('')
+    }
+
+    const updateAmbient = (patch: Partial<AmbientState>) => {
+      userTouched = true
+      setAmbient(patch)
+      persist()
+    }
+
+    const handleFile = (file: File) => {
+      userTouched = true
+      const reader = new FileReader()
+      reader.onload = () => {
+        const dataUrl = String(reader.result)
+        const m = /^data:([a-z0-9.+-]+\/[a-z0-9.+-]+);base64,(.*)$/.exec(dataUrl)
+        if (m === null) {
+          setNotice(t('notice.bgReadError'))
+          return
+        }
+        const bgData = { mime: m[1], data: m[2] }
+        applyBackgroundData(bgData)
+        saveBackground(bgData)
+        persist()
+        setNotice(t('notice.bgApplied'))
+      }
+      reader.onerror = () => setNotice(t('notice.bgReadError'))
+      reader.readAsDataURL(file)
+    }
+
+    const choosePreset = (key: string) => () => {
+      userTouched = true
+      setActivePreset(key)
+      if (key === 'default') {
+        setAmbient({ ...DEFAULT_AMBIENT })
+        clearSettings()
+        if (activeLayer !== null) {
+          activeLayer()
+          activeLayer = null
+        }
+        if (bgEnabled) {
+          // 背景图保留：读回产品默认令牌值，用半透明版重建（配色回默认 + 面板仍透图）
+          const product = readProductTokens()
+          setColors(product)
+          applyColors(product, currentBrandDark)
+          setNotice(t('notice.bgReadback', { value: String(product['bg-base'] ?? '?') }))
+        } else {
+          setNotice(t('notice.systemDefault'))
+        }
+        return
+      }
+      const p = PALETTES[key]
+      if (p === undefined) return
+      setColors(p.light)
+      setBrandDark(p.brandDark)
+      applyColors(p.light, p.brandDark)
+      persist()
+      setNotice(t('notice.appliedPreset', { name: p.label }))
+    }
+
+    const applyCustom = () => {
+      userTouched = true
+      applyColors(colors, brandDark)
+      persist()
+      setActivePreset('')
+      setNotice(t('notice.customApplied'))
+    }
+
+    return createElement('div', { className: 'guic-panel' },
+      createElement('div', { className: 'guic-h' }, t('group.presets')),
+      createElement('div', { className: 'guic-presets' },
+        PRESET_ORDER.map((key) => createElement('button', {
+          key,
+          className: activePreset === key ? 'guic-preset guic-preset-active' : 'guic-preset',
+          onClick: choosePreset(key),
+        }, t('preset.' + key))),
+      ),
+      createElement('div', { className: 'guic-h' }, t('group.colors')),
+      createElement('div', { className: 'guic-grid' },
+        FIELDS.map(([key, label]) => {
+          const value = colors[key] ?? ''
+          const hex = /^#[0-9a-fA-F]{6}$/.test(value) ? value : '#0053FD'
+          return createElement('div', { className: 'guic-field', key },
+            createElement('span', { className: 'guic-field-label' }, t('field.' + key)),
+            createElement('input', {
+              type: 'color',
+              className: 'guic-field-color',
+              value: hex,
+              onChange: (ev: any) => update(key, String(ev.target.value)),
+            }),
+            createElement('input', {
+              type: 'text',
+              className: 'guic-field-text',
+              value,
+              onChange: (ev: any) => update(key, String(ev.target.value)),
+            }),
+          )
+        }),
+      ),
+      createElement('div', { className: 'guic-actions' },
+        createElement('button', { className: 'guic-btn guic-btn-primary', onClick: applyCustom }, t('action.applyColors')),
+      ),
+      createElement('div', { className: 'guic-h' }, t('group.ambient')),
+      createElement('div', { className: 'guic-ambient-row' },
+        createElement('button', {
+          className: ambient.enabled ? 'guic-btn guic-btn-primary' : 'guic-btn',
+          onClick: () => updateAmbient({ enabled: !ambient.enabled }),
+        }, ambient.enabled ? t('ambient.on') : t('ambient.off')),
+        createElement('label', { className: 'guic-check' },
+          createElement('input', {
+            type: 'checkbox',
+            checked: ambient.breathe,
+            onChange: (ev: any) => updateAmbient({ breathe: Boolean(ev.target.checked) }),
+          }),
+          t('ambient.breathe'),
+        ),
+      ),
+      createElement('div', { className: 'guic-ambient-row' },
+        createElement('span', { className: 'guic-field-label' }, t('ambient.strength')),
+        createElement('input', {
+          type: 'range',
+          min: 0,
+          max: 40,
+          className: 'guic-range',
+          value: Math.round(ambient.strength * 100),
+          onChange: (ev: any) => updateAmbient({ strength: Number(ev.target.value) / 100 }),
+        }),
+        createElement('span', { className: 'guic-note' }, `${Math.round(ambient.strength * 100)}%`),
+      ),
+      createElement('div', { className: 'guic-ambient-row' },
+        createElement('span', { className: 'guic-field-label' }, t('ambient.breath')),
+        createElement('input', {
+          type: 'range',
+          min: 0,
+          max: 100,
+          className: 'guic-range',
+          value: Math.round((Number(ambient.breatheAmp) || 0) * 100),
+          onChange: (ev: any) => updateAmbient({ breatheAmp: Number(ev.target.value) / 100 }),
+        }),
+        createElement('span', { className: 'guic-note' }, `${Math.round((Number(ambient.breatheAmp) || 0) * 100)}%`),
+      ),
+      createElement('div', { className: 'guic-ambient-row' },
+        createElement('span', { className: 'guic-field-label' }, t('ambient.position')),
+        POSITION_ORDER.map((key) => createElement('button', {
+          key,
+          className: ambient.position === key ? 'guic-preset guic-preset-active' : 'guic-preset',
+          onClick: () => updateAmbient({ position: key }),
+        }, t('pos.' + key))),
+      ),
+      createElement('div', { className: 'guic-h' }, t('group.bg')),
+      createElement('div', { className: 'guic-ambient-row' },
+        createElement('span', { className: 'guic-field-label' }, t('bg.status')),
+        createElement('span', { className: 'guic-note' }, bg ? t('ambient.on') : t('ambient.off')),
+        createElement('label', { className: 'guic-btn guic-btn-primary' },
+          createElement('input', {
+            type: 'file',
+            accept: 'image/*',
+            style: { display: 'none' },
+            onChange: (ev: any) => {
+              const file = ev.target !== null && ev.target.files !== null && ev.target.files.length > 0 ? ev.target.files[0] : null
+              if (file !== null) handleFile(file)
+            },
+          }),
+          t('bg.choose'),
+        ),
+        createElement('button', { className: 'guic-btn', onClick: clearBackground }, t('bg.clear')),
+      ),
+      createElement('div', { className: 'guic-note' },
+        t('bg.note'),
+      ),
+      createElement('div', { className: 'guic-notice' }, notice),
+      createElement('div', { className: 'guic-note' },
+        t('hint.persist'),
+      ),
+    )
+  }
+
+  function PluginCard() {
+    return createElement('div', { className: 'guic-plugin-card' },
+      createElement('div', { className: 'guic-plugin-name' }, t('plugin.name')),
+      createElement('div', { className: 'guic-plugin-desc' }, t('plugin.desc')),
+    )
+  }
+
+  // ---- 槽位注册 ----
+  slots.inject('settings.section', () => slots.register(
+    { name: 'settings.section', id: 'gui-customization', order: 5, label: () => t('nav.label') },
+    () => createElement(GuiPanel),
+  ))
+  slots.inject('shell.overlay', () => slots.register(
+    { name: 'shell.overlay', id: 'guic-ambient', order: 0 },
+    () => createElement(AmbientLayer),
+  ))
+  slots.inject('settings.plugin.item', () => slots.register(
+    { name: 'settings.plugin.item', id: 'gui-customization', order: 30, label: () => t('nav.label') },
+    () => createElement(PluginCard),
+  ))
+}

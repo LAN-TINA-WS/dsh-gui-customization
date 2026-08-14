@@ -1,0 +1,5 @@
+# dsh-gui-customization bundle patch: inserts its dshClient row into the web plugin roster.
+# Install with: dsh plugin --profile web add link:<repo>/packages/dsh-gui-customization
+- insert:
+    - id: ui-gui-customization
+      name: 'dsh-gui-customization'
