@@ -75,6 +75,13 @@ dsh plugin --profile web add link:<仓库>/packages/dsh-gui-customization
 
 问题、需求、配色分享：提交到 [issue #1（欢迎反馈）](https://github.com/LAN-TINA-WS/dsh-gui-customization/issues/1)。
 
+## 贡献者
+
+| 贡献者 | 贡献 |
+| --- | --- |
+| [QinYun165](https://github.com/QinYun165) | 大量 BUG 反馈 |
+| [FuturePioneer-3](https://github.com/FuturePioneer-3) | 深色主题背景图修复（[PR #2](https://github.com/LAN-TINA-WS/dsh-gui-customization/pull/2)） |
+
 ## License
 
 本项目采用 [MIT License](LICENSE)。仓库内 `build/` 下的 tsdown 构建 preset 源自 [dsh-web-ui](https://github.com/zhu1090093659/dsh-web-ui)（BSD-3-Clause，© zhu1090093659），其许可声明保留在各文件头部。

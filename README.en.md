@@ -75,6 +75,13 @@ Inside Settings → Interface Settings:
 
 Bugs, feature requests, palette sharing: post to [issue #1 (Welcome Feedback)](https://github.com/LAN-TINA-WS/dsh-gui-customization/issues/1).
 
+## Contributors
+
+| Contributor | Contribution |
+| --- | --- |
+| [QinYun165](https://github.com/QinYun165) | Extensive bug feedback |
+| [FuturePioneer-3](https://github.com/FuturePioneer-3) | Dark-theme background fix ([PR #2](https://github.com/LAN-TINA-WS/dsh-gui-customization/pull/2)) |
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE). The tsdown build preset under `build/` is vendored from [dsh-web-ui](https://github.com/zhu1090093659/dsh-web-ui) (BSD-3-Clause, © zhu1090093659); its notice is preserved in each file header.
