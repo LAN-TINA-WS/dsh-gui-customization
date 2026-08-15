@@ -3,6 +3,11 @@
 All notable changes to dsh-gui-customization are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/).
 
+## [0.6.1] - 2026-08-15
+
+### Fixed
+- Preset highlight now survives the settings panel remounting: opening Settings after applying Indigo/Emerald/custom colors no longer falsely highlights "Nous Blue". The active preset is hoisted to plugin scope and persisted.
+
 ## [0.6.0] - 2026-08-15
 
 ### Added
