@@ -1,4 +1,16 @@
 /**
+ * 版权声明 / Copyright
+ *
+ * - 主版权：Copyright (c) 2026 LAN-TINA-WS，项目以 MIT License 授权（见根目录 LICENSE）。
+ * - 深色主题背景透明度修复：Copyright (c) 2026 FuturePioneer-3。
+ *   本文件中的修改仅限「背景开启时对暗色面应用透明度」一处，其余代码版权归原作者所有。
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files, to deal in the Software
+ * without restriction. See the LICENSE file for the full MIT license text.
+ */
+
+/**
  * GUICustomization（组合版）— Client 入口。
  *
  * 相对动态版（plugins/gui-customization）的能力差异：
@@ -208,8 +220,12 @@ export function apply(ctx: Ctx) {
   }
 
   // ---- 主题引擎 ----
-  function buildTokens(light: Record<string, string>, brandDark: string): Record<string, { light: string; dark: string }> {
-    const dark: Record<string, string> = { ...DARK }
+  function buildTokens(
+    light: Record<string, string>,
+    brandDark: string,
+    darkOverride?: Record<string, string>,
+  ): Record<string, { light: string; dark: string }> {
+    const dark: Record<string, string> = darkOverride ?? { ...DARK }
     dark['brand-primary'] = brandDark
     const tokens: Record<string, { light: string; dark: string }> = {}
     for (const key in TOKEN_KEYS) {
@@ -268,7 +284,9 @@ export function apply(ctx: Ctx) {
 
   function renderTheme() {
     const light = bgEnabled ? translucent(currentColors) : currentColors
-    activeLayer = theme.overrideTokens(SOURCE, buildTokens(light, currentBrandDark))
+    // 背景开启时，暗色面同样降透明度，否则深色主题下背景被不透明底色完全遮挡
+    const dark = bgEnabled ? translucent({ ...DARK }) : undefined
+    activeLayer = theme.overrideTokens(SOURCE, buildTokens(light, currentBrandDark, dark))
   }
 
   function applyColors(light: Record<string, string>, brandDark: string) {
