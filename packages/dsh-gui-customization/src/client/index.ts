@@ -1,16 +1,4 @@
 /**
- * 版权声明 / Copyright
- *
- * - 主版权：Copyright (c) 2026 LAN-TINA-WS，项目以 MIT License 授权（见根目录 LICENSE）。
- * - 深色主题背景透明度修复：Copyright (c) 2026 FuturePioneer-3。
- *   本文件中的修改仅限「背景开启时对暗色面应用透明度」一处，其余代码版权归原作者所有。
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files, to deal in the Software
- * without restriction. See the LICENSE file for the full MIT license text.
- */
-
-/**
  * GUICustomization（组合版）— Client 入口。
  *
  * 相对动态版（plugins/gui-customization）的能力差异：

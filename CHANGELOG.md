@@ -3,6 +3,11 @@
 All notable changes to dsh-gui-customization are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/).
 
+## [0.5.3] - 2026-08-15
+
+### Fixed
+- Dark theme: background image/video/preset now shows through (dark-side tokens were left opaque) — fix contributed by [@FuturePioneer-3](https://github.com/FuturePioneer-3), thank you!
+
 ## [0.5.2] - 2026-08-14
 
 ### Added

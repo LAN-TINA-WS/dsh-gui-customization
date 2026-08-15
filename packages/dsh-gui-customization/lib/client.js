@@ -615,8 +615,8 @@ window.__ModuleLoader__.load({
 					videoLayer = null;
 				}
 			}
-			function buildTokens(light, brandDark) {
-				const dark = { ...DARK };
+			function buildTokens(light, brandDark, darkOverride) {
+				const dark = darkOverride ?? { ...DARK };
 				dark["brand-primary"] = brandDark;
 				const tokens = {};
 				for (const key in TOKEN_KEYS) tokens[TOKEN_KEYS[key]] = {
@@ -651,7 +651,8 @@ window.__ModuleLoader__.load({
 			}
 			function renderTheme() {
 				const light = bgEnabled ? translucent(currentColors) : currentColors;
-				activeLayer = theme.overrideTokens(SOURCE, buildTokens(light, currentBrandDark));
+				const dark = bgEnabled ? translucent({ ...DARK }) : void 0;
+				activeLayer = theme.overrideTokens(SOURCE, buildTokens(light, currentBrandDark, dark));
 			}
 			function applyColors(light, brandDark) {
 				currentColors = light;
