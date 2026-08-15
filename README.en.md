@@ -2,6 +2,8 @@
 
 [中文](README.md) | English
 
+![DS Girl · Fashion Workshop](docs/screenshots/dsgirl-fashion-workshop.jpg)
+
 [![npm version](https://img.shields.io/npm/v/dsh-gui-customization)](https://www.npmjs.com/package/dsh-gui-customization)
 [![npm downloads](https://img.shields.io/npm/dw/dsh-gui-customization)](https://www.npmjs.com/package/dsh-gui-customization)
 [![GitHub stars](https://img.shields.io/github/stars/LAN-TINA-WS/dsh-gui-customization)](https://github.com/LAN-TINA-WS/dsh-gui-customization)
