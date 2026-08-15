@@ -9,8 +9,6 @@
 [![GitHub stars](https://img.shields.io/github/stars/LAN-TINA-WS/dsh-gui-customization)](https://github.com/LAN-TINA-WS/dsh-gui-customization)
 [![license](https://img.shields.io/github/license/LAN-TINA-WS/dsh-gui-customization)](LICENSE)
 
-![DeepSeek Harness Fashion Workshop · dsh-gui-customization](docs/screenshots/gui-customization-poster.jpg)
-
 ## dsh-gui-customization
 
 A **theme customization plugin** for the DeepSeek Harness Web UI: default Nous Blue palette (light/dark), four presets and 13 custom colors, ambient glow (halo/breathing/position, live), dynamic backgrounds (image/video via native file picker + built-in preset "DeepSeek Girl 01" + background opacity slider + sidebar transparency toggle), palette import/export, bilingual Chinese/English UI, persistent settings that survive restarts. Config entry: Settings → Interface Settings.
