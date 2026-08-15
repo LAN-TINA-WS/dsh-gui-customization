@@ -80,10 +80,6 @@ const MAIN_CSS = `
   .guic-plugin-name { font-size: 13px; font-weight: 600; color: var(--dsw-alias-label-primary); }
   .guic-plugin-desc { margin-top: 4px; font-size: 12px; color: var(--dsw-alias-label-secondary); line-height: 1.6; }
 
-  /* 会话头部快捷入口 */
-  .guic-icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; border: 1px solid var(--dsw-alias-border-l1); border-radius: 8px; background: var(--dsw-alias-bg-layer-1); color: var(--dsw-alias-label-primary); cursor: pointer; }
-  .guic-icon-btn:hover { border-color: var(--dsw-alias-brand-primary); }
-  .guic-quick-panel { position: absolute; right: 0; top: calc(100% + 6px); z-index: 40; min-width: 190px; display: flex; flex-direction: column; gap: 10px; padding: 12px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 10px; background: var(--dsw-alias-bg-overlay); box-shadow: 0 10px 30px rgba(0, 10, 40, 0.25); }
 `
 
 export function apply(ctx: Ctx) {
@@ -142,12 +138,6 @@ export function apply(ctx: Ctx) {
   const sidebarTransparentListeners: Array<(value: boolean) => void> = []
   let bgOpacity = 0.3
   const bgOpacityListeners: Array<(value: number) => void> = []
-  let quickEntryEnabled = true
-  const quickEntryListeners: Array<(value: boolean) => void> = []
-  function setQuickEntryEnabled(value: boolean) {
-    quickEntryEnabled = value
-    quickEntryListeners.slice().forEach((fn) => fn(value))
-  }
   function setBg(enabled: boolean) {
     bgEnabled = enabled
     bgListeners.slice().forEach((fn) => fn(enabled))
@@ -288,7 +278,7 @@ export function apply(ctx: Ctx) {
   }
 
   function persist() {
-    saveSettings({ colors: currentColors, brandDark: currentBrandDark, ambient: ambientState, bgKind, bgSidebarTransparent, bgOpacity, quickEntryEnabled })
+    saveSettings({ colors: currentColors, brandDark: currentBrandDark, ambient: ambientState, bgKind, bgSidebarTransparent, bgOpacity })
   }
 
   // ---- 背景图引擎（body 属性正规方案，scrim 随明暗自适应）----
@@ -398,9 +388,6 @@ export function apply(ctx: Ctx) {
   if (saved !== null && typeof saved.bgOpacity === 'number') {
     setBgOpacity(saved.bgOpacity as number)
   }
-  if (saved !== null && saved.quickEntryEnabled === false) {
-    setQuickEntryEnabled(false)
-  }
   void loadBackground().then((bg) => {
     if (bg !== null && !userTouched && bgKind === 'image') {
       applyBackgroundData(bg)
@@ -447,7 +434,6 @@ export function apply(ctx: Ctx) {
     const [bgOpacityUi, setBgOpacityUi] = useState<number>(bgOpacity)
     const [langTick, setLangTick] = useState<number>(0)
     const [ioText, setIoText] = useState<string>('')
-    const [quickUi, setQuickUi] = useState<boolean>(quickEntryEnabled)
 
     useEffect(() => {
       if (locale === undefined) return
@@ -514,15 +500,6 @@ export function apply(ctx: Ctx) {
       return () => {
         const i = bgOpacityListeners.indexOf(listener)
         if (i >= 0) bgOpacityListeners.splice(i, 1)
-      }
-    }, [])
-
-    useEffect(() => {
-      const listener = (value: boolean) => setQuickUi(value)
-      quickEntryListeners.push(listener)
-      return () => {
-        const i = quickEntryListeners.indexOf(listener)
-        if (i >= 0) quickEntryListeners.splice(i, 1)
       }
     }, [])
 
@@ -664,20 +641,6 @@ export function apply(ctx: Ctx) {
     }
 
     return createElement('div', { className: 'guic-panel' },
-      createElement('div', { className: 'guic-ambient-row' },
-        createElement('label', { className: 'guic-check' },
-          createElement('input', {
-            type: 'checkbox',
-            checked: quickUi,
-            onChange: (ev: any) => {
-              userTouched = true
-              setQuickEntryEnabled(Boolean(ev.target.checked))
-              persist()
-            },
-          }),
-          t('quick.enable'),
-        ),
-      ),
       createElement('div', { className: 'guic-h' }, t('group.presets')),
       createElement('div', { className: 'guic-presets' },
         PRESET_ORDER.map((key) => createElement('button', {
@@ -873,104 +836,6 @@ export function apply(ctx: Ctx) {
     )
   }
 
-  // ---- 会话头部快捷入口（预设快速切换 + 背景开关）----
-  const QUICK_ICON_SVG = '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M8 2.5a5.5 5.5 0 1 1 0 11a5.5 5.5 0 0 1 0-11z"/><circle cx="5.95" cy="5.95" r="1" fill="currentColor" stroke="none"/><circle cx="10.05" cy="5.95" r="1" fill="currentColor" stroke="none"/><circle cx="5.95" cy="10.05" r="1" fill="currentColor" stroke="none"/><circle cx="10.05" cy="10.05" r="1" fill="currentColor" stroke="none"/></svg>'
-
-  function quickApplyPreset(key: string) {
-    userTouched = true
-    if (key === 'default') {
-      if (activeLayer !== null) { activeLayer(); activeLayer = null }
-      setAmbient({ ...DEFAULT_AMBIENT })
-      clearBackground()
-      clearVideoBackground()
-      clearSettings()
-      return
-    }
-    const p = PALETTES[key]
-    if (p === undefined) return
-    applyColors(p.light, p.brandDark)
-    persist()
-  }
-
-  function QuickEntry() {
-    const [enabled, setEnabled] = useState<boolean>(quickEntryEnabled)
-    const [open, setOpen] = useState<boolean>(false)
-    const [bgState, setBgState] = useState<boolean>(bgEnabled)
-    let rootEl: HTMLDivElement | null = null
-
-    useEffect(() => {
-      const listener = (value: boolean) => setEnabled(value)
-      quickEntryListeners.push(listener)
-      return () => {
-        const i = quickEntryListeners.indexOf(listener)
-        if (i >= 0) quickEntryListeners.splice(i, 1)
-      }
-    }, [])
-
-    useEffect(() => {
-      const listener = (value: boolean) => setBgState(value)
-      bgListeners.push(listener)
-      return () => {
-        const i = bgListeners.indexOf(listener)
-        if (i >= 0) bgListeners.splice(i, 1)
-      }
-    }, [])
-
-    useEffect(() => {
-      if (!open) return
-      const onDown = (ev: MouseEvent) => {
-        if (rootEl !== null && !rootEl.contains(ev.target as Node)) setOpen(false)
-      }
-      document.addEventListener('mousedown', onDown)
-      return () => document.removeEventListener('mousedown', onDown)
-    }, [open])
-
-    if (!enabled) return null
-
-    const toggleBg = () => {
-      userTouched = true
-      setOpen(false)
-      if (bgEnabled) {
-        if (bgKind === 'video') { clearVideoBackground() } else { clearBackground() }
-        persist()
-      } else if (bgKind === 'video') {
-        void loadVideo().then((v) => {
-          if (v !== null) { applyVideoData(v); persist() }
-        })
-      } else {
-        void loadBackground().then((b) => {
-          if (b !== null) { applyBackgroundData(b); persist() }
-        })
-      }
-    }
-
-    return createElement('div', {
-      ref: (el: HTMLDivElement | null) => { rootEl = el },
-      style: { position: 'relative', display: 'inline-flex' },
-    },
-      createElement('button', {
-        className: 'guic-icon-btn',
-        title: t('quick.title'),
-        'aria-label': t('quick.title'),
-        onClick: () => setOpen((o) => !o),
-      }, createElement('span', { dangerouslySetInnerHTML: { __html: QUICK_ICON_SVG } })),
-      open ? createElement('div', { className: 'guic-quick-panel' },
-        createElement('div', { className: 'guic-h' }, t('group.presets')),
-        createElement('div', { className: 'guic-presets' },
-          PRESET_ORDER.map((key) => createElement('button', {
-            key,
-            className: 'guic-preset',
-            onClick: () => { setOpen(false); quickApplyPreset(key) },
-          }, t('preset.' + key))),
-        ),
-        createElement('button', {
-          className: bgState ? 'guic-btn' : 'guic-btn guic-btn-primary',
-          onClick: toggleBg,
-        }, bgState ? t('bg.quickOff') : t('bg.quickOn')),
-      ) : null,
-    )
-  }
-
   // ---- 设置导航图标增强（插件框架内手术式方案：失效静默降级为齿轮）----
   const NAV_ICON_SVG = '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="2.2" y="3.2" width="11.6" height="9.6" rx="1.8"/><path d="M5 6.7l1.8 1.8-1.8 1.8"/><path d="M9 10.3h2.6"/></svg>'
 
@@ -1013,9 +878,5 @@ export function apply(ctx: Ctx) {
   slots.inject('settings.plugin.item', () => slots.register(
     { name: 'settings.plugin.item', id: 'gui-customization', order: 30, label: () => t('nav.label') },
     () => createElement(PluginCard),
-  ))
-  slots.inject('conversation.session.header.actions', () => slots.register(
-    { name: 'conversation.session.header.actions', id: 'guic-quick', order: 30, label: () => t('quick.title') },
-    () => createElement(QuickEntry),
   ))
 }

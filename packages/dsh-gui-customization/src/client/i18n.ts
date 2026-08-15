@@ -5,8 +5,6 @@
 
 export const DICT_ZH: Record<string, string> = {
   'nav.label': '界面设定',
-  'quick.title': '快捷配色',
-  'quick.enable': '会话头部快捷入口',
   'plugin.name': '界面设定（GUICustomization）',
   'plugin.desc': 'Nous 蓝默认配色、预设与自定义 13 色、氛围光（光晕/呼吸/位置）、背景图。请在「设置 → 界面设定」中配置。',
 
@@ -64,8 +62,6 @@ export const DICT_ZH: Record<string, string> = {
   'bg.video.status': '视频背景',
   'bg.video.choose': '选择视频文件…',
   'bg.video.clear': '清除视频',
-  'bg.quickOn': '开启背景',
-  'bg.quickOff': '关闭背景',
   'bg.sidebarTransparent': '侧边栏透明（背景开启时透出背景）',
   'bg.opacity': '背景透明度',
   'bg.note': '开启后对话主区大幅透出图片（底色降至 30% 不透明），卡片与侧栏轻微透图，遮罩随明暗自适应；图片数据存于浏览器 IndexedDB，刷新与重启后自动恢复。',
@@ -87,8 +83,6 @@ export const DICT_ZH: Record<string, string> = {
 
 export const DICT_EN: Record<string, string> = {
   'nav.label': 'Interface Settings',
-  'quick.title': 'Quick style',
-  'quick.enable': 'Quick entry in session header',
   'plugin.name': 'Interface Settings (GUICustomization)',
   'plugin.desc': 'Nous Blue default palette, presets and 13 custom colors, ambient glow (halo/breathing/position), background image. Configure under Settings → Interface Settings.',
 
@@ -146,8 +140,6 @@ export const DICT_EN: Record<string, string> = {
   'bg.video.status': 'Video background',
   'bg.video.choose': 'Choose video file…',
   'bg.video.clear': 'Remove video',
-  'bg.quickOn': 'Enable background',
-  'bg.quickOff': 'Disable background',
   'bg.sidebarTransparent': 'Transparent sidebar (shows backdrop when background is on)',
   'bg.opacity': 'Background opacity',
   'bg.note': 'When enabled the conversation area shows the image (base surface drops to 30% opacity), cards and sidebar stay slightly translucent, and the scrim adapts to light/dark. Image data is kept in browser IndexedDB and restored across refreshes and restarts.',
