@@ -140,6 +140,9 @@ export function apply(ctx: Ctx) {
   const sidebarTransparentListeners: Array<(value: boolean) => void> = []
   let bgOpacity = 0.3
   const bgOpacityListeners: Array<(value: number) => void> = []
+  // 预设选中态提升到 apply 闭包：设置面板每次打开都会重新挂载，
+  // 组件本地 state 会重置为 'nous'，导致高亮与实际配色不符
+  let activePresetName = 'nous'
   function setBg(enabled: boolean) {
     bgEnabled = enabled
     bgListeners.slice().forEach((fn) => fn(enabled))
@@ -288,7 +291,7 @@ export function apply(ctx: Ctx) {
   }
 
   function persist() {
-    saveSettings({ colors: currentColors, darkColors: currentDarkColors, brandDark: currentBrandDark, ambient: ambientState, bgKind, bgSidebarTransparent, bgOpacity })
+    saveSettings({ colors: currentColors, darkColors: currentDarkColors, brandDark: currentBrandDark, ambient: ambientState, bgKind, bgSidebarTransparent, bgOpacity, activePreset: activePresetName })
   }
 
   // ---- 背景图引擎（body 属性正规方案，scrim 随明暗自适应）----
@@ -402,6 +405,9 @@ export function apply(ctx: Ctx) {
   if (saved !== null && typeof saved.bgOpacity === 'number') {
     setBgOpacity(saved.bgOpacity as number)
   }
+  if (saved !== null && typeof saved.activePreset === 'string') {
+    activePresetName = saved.activePreset
+  }
   void loadBackground().then((bg) => {
     if (bg !== null && !userTouched && bgKind === 'image') {
       applyBackgroundData(bg)
@@ -441,7 +447,11 @@ export function apply(ctx: Ctx) {
     const [darkColors, setDarkColors] = useState<Record<string, string>>({ ...DARK, 'brand-primary': PALETTES.nous.brandDark })
     const [colorMode, setColorMode] = useState<'light' | 'dark'>('light')
     const [brandDark, setBrandDark] = useState<string>(PALETTES.nous.brandDark)
-    const [activePreset, setActivePreset] = useState<string>('nous')
+    const [activePreset, setActivePreset] = useState<string>(activePresetName)
+    const setPreset = (value: string) => {
+      activePresetName = value
+      setActivePreset(value)
+    }
     const [notice, setNotice] = useState<string>(t('notice.defaultApplied', { name: t('preset.nous') }))
     const [ambient, setAmbientUi] = useState<AmbientState>(ambientState)
     const [bg, setBgUi] = useState<boolean>(bgEnabled)
@@ -465,7 +475,7 @@ export function apply(ctx: Ctx) {
         const sd = savedState.darkColors
         setDarkColors((sd !== undefined && typeof sd === 'object') ? { ...DARK, ...(sd as Record<string, string>) } : { ...DARK, 'brand-primary': (savedState.brandDark as string) || PALETTES.nous.brandDark })
         setBrandDark((savedState.brandDark as string) || PALETTES.nous.brandDark)
-        setActivePreset(null as unknown as string)
+        setPreset((typeof savedState.activePreset === 'string') ? savedState.activePreset : '')
         setNotice(t('notice.loaded'))
       }
       syncListeners.push(sync)
@@ -528,7 +538,7 @@ export function apply(ctx: Ctx) {
       } else {
         setColors((prev) => ({ ...prev, [key]: value }))
       }
-      setActivePreset('')
+      setPreset('')
     }
 
     const updateAmbient = (patch: Partial<AmbientState>) => {
@@ -581,7 +591,7 @@ export function apply(ctx: Ctx) {
 
     const choosePreset = (key: string) => () => {
       userTouched = true
-      setActivePreset(key)
+      setPreset(key)
       if (key === 'default') {
         setAmbient({ ...DEFAULT_AMBIENT })
         clearSettings()
@@ -617,7 +627,7 @@ export function apply(ctx: Ctx) {
       userTouched = true
       applyColors(colors, darkColors, brandDark)
       persist()
-      setActivePreset('')
+      setPreset('')
       setNotice(t('notice.customApplied'))
     }
 
@@ -671,7 +681,7 @@ export function apply(ctx: Ctx) {
       setAmbient(newAmbient)
       applyColors(merged, mergedDark, newBrandDark)
       persist()
-      setActivePreset('')
+      setPreset('')
       setNotice(t('io.imported'))
     }
 

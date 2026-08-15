@@ -548,6 +548,7 @@ window.__ModuleLoader__.load({
 			const sidebarTransparentListeners = [];
 			let bgOpacity = .3;
 			const bgOpacityListeners = [];
+			let activePresetName = "nous";
 			function setBg(enabled) {
 				bgEnabled = enabled;
 				bgListeners.slice().forEach((fn) => fn(enabled));
@@ -678,7 +679,8 @@ window.__ModuleLoader__.load({
 					ambient: ambientState,
 					bgKind,
 					bgSidebarTransparent,
-					bgOpacity
+					bgOpacity,
+					activePreset: activePresetName
 				});
 			}
 			let bgBlobUrl = null;
@@ -784,6 +786,7 @@ window.__ModuleLoader__.load({
 			if (saved !== null && (saved.bgKind === "video" || saved.bgKind === "image")) setBgKind(saved.bgKind);
 			if (saved !== null && saved.bgSidebarTransparent === true) setBgSidebarTransparent(true);
 			if (saved !== null && typeof saved.bgOpacity === "number") setBgOpacity(saved.bgOpacity);
+			if (saved !== null && typeof saved.activePreset === "string") activePresetName = saved.activePreset;
 			loadBackground().then((bg) => {
 				if (bg !== null && !userTouched && bgKind === "image") applyBackgroundData(bg);
 			});
@@ -821,7 +824,11 @@ window.__ModuleLoader__.load({
 				});
 				const [colorMode, setColorMode] = (0, react.useState)("light");
 				const [brandDark, setBrandDark] = (0, react.useState)(PALETTES.nous.brandDark);
-				const [activePreset, setActivePreset] = (0, react.useState)("nous");
+				const [activePreset, setActivePreset] = (0, react.useState)(activePresetName);
+				const setPreset = (value) => {
+					activePresetName = value;
+					setActivePreset(value);
+				};
 				const [notice, setNotice] = (0, react.useState)(t("notice.defaultApplied", { name: t("preset.nous") }));
 				const [ambient, setAmbientUi] = (0, react.useState)(ambientState);
 				const [bg, setBgUi] = (0, react.useState)(bgEnabled);
@@ -847,7 +854,7 @@ window.__ModuleLoader__.load({
 							"brand-primary": savedState.brandDark || PALETTES.nous.brandDark
 						});
 						setBrandDark(savedState.brandDark || PALETTES.nous.brandDark);
-						setActivePreset(null);
+						setPreset(typeof savedState.activePreset === "string" ? savedState.activePreset : "");
 						setNotice(t("notice.loaded"));
 					};
 					syncListeners.push(sync);
@@ -907,7 +914,7 @@ window.__ModuleLoader__.load({
 						...prev,
 						[key]: value
 					}));
-					setActivePreset("");
+					setPreset("");
 				};
 				const updateAmbient = (patch) => {
 					userTouched = true;
@@ -957,7 +964,7 @@ window.__ModuleLoader__.load({
 				};
 				const choosePreset = (key) => () => {
 					userTouched = true;
-					setActivePreset(key);
+					setPreset(key);
 					if (key === "default") {
 						setAmbient({ ...DEFAULT_AMBIENT });
 						clearSettings();
@@ -995,7 +1002,7 @@ window.__ModuleLoader__.load({
 					userTouched = true;
 					applyColors(colors, darkColors, brandDark);
 					persist();
-					setActivePreset("");
+					setPreset("");
 					setNotice(t("notice.customApplied"));
 				};
 				const doExport = () => {
@@ -1043,7 +1050,7 @@ window.__ModuleLoader__.load({
 					setAmbient(newAmbient);
 					applyColors(merged, mergedDark, newBrandDark);
 					persist();
-					setActivePreset("");
+					setPreset("");
 					setNotice(t("io.imported"));
 				};
 				return (0, react.createElement)("div", { className: "guic-panel" }, (0, react.createElement)("div", { className: "guic-h" }, t("group.presets")), (0, react.createElement)("div", { className: "guic-presets" }, PRESET_ORDER.map((key) => (0, react.createElement)("button", {
