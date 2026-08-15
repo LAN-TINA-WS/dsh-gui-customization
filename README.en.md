@@ -33,17 +33,23 @@ A **theme customization plugin** for the DeepSeek Harness Web UI: default Nous B
 
 ## Quick Install
 
-**npm install (recommended, one command)**:
+**GitHub install (recommended, fastest in CN networks, no npm wait)**:
+
+```sh
+dsh plugin --profile web add github:LAN-TINA-WS/dsh-gui-customization#path:packages/dsh-gui-customization
+# restart dsh web, then open Settings → Interface Settings to configure
+```
+
+**npm install (one command)**:
 
 ```sh
 dsh plugin --profile web add dsh-gui-customization
-# restart dsh web, then open Settings → Interface Settings to configure
 ```
 
 **Release ZIP install**:
 
 1. Download `dsh-gui-customization-v*.zip` from [Releases](https://github.com/LAN-TINA-WS/dsh-gui-customization/releases/latest) and unzip it
-2. `dsh plugin --profile web add link:<unzip-dir>/dsh-gui-customization-v0.5.0`
+2. `dsh plugin --profile web add link:<unzip-dir>/dsh-gui-customization-v0.5.2`
 3. Restart `dsh web`, then open Settings → Interface Settings to configure
 
 **Build from source** (developers):

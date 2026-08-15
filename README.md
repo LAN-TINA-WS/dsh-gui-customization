@@ -33,17 +33,23 @@ DeepSeek Harness Web UI 的**主题定制插件**：Nous 蓝默认配色（明�
 
 ## 快速安装
 
-**npm 安装（推荐，一条命令）**：
+**GitHub 直装（推荐，国内网络最快，免等 npm）**：
+
+```sh
+dsh plugin --profile web add github:LAN-TINA-WS/dsh-gui-customization#path:packages/dsh-gui-customization
+# 重启 dsh web，打开「设置 → 界面设定」开始配置
+```
+
+**npm 安装（一条命令）**：
 
 ```sh
 dsh plugin --profile web add dsh-gui-customization
-# 重启 dsh web，打开「设置 → 界面设定」开始配置
 ```
 
 **Release ZIP 安装**：
 
 1. 从 [Releases](https://github.com/LAN-TINA-WS/dsh-gui-customization/releases/latest) 下载 `dsh-gui-customization-v*.zip` 并解压
-2. `dsh plugin --profile web add link:<解压目录>/dsh-gui-customization-v0.5.0`
+2. `dsh plugin --profile web add link:<解压目录>/dsh-gui-customization-v0.5.2`
 3. 重启 `dsh web`，打开「设置 → 界面设定」开始配置
 
 **从源码构建安装**（开发者）：
