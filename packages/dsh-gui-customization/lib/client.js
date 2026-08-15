@@ -273,6 +273,8 @@ window.__ModuleLoader__.load({
 		*/
 		const DICT_ZH = {
 			"nav.label": "界面设定",
+			"quick.title": "快捷配色",
+			"quick.enable": "会话头部快捷入口",
 			"plugin.name": "界面设定（GUICustomization）",
 			"plugin.desc": "Nous 蓝默认配色、预设与自定义 13 色、氛围光（光晕/呼吸/位置）、背景图。请在「设置 → 界面设定」中配置。",
 			"group.presets": "预设配色",
@@ -325,6 +327,8 @@ window.__ModuleLoader__.load({
 			"bg.video.status": "视频背景",
 			"bg.video.choose": "选择视频文件…",
 			"bg.video.clear": "清除视频",
+			"bg.quickOn": "开启背景",
+			"bg.quickOff": "关闭背景",
 			"bg.sidebarTransparent": "侧边栏透明（背景开启时透出背景）",
 			"bg.opacity": "背景透明度",
 			"bg.note": "开启后对话主区大幅透出图片（底色降至 30% 不透明），卡片与侧栏轻微透图，遮罩随明暗自适应；图片数据存于浏览器 IndexedDB，刷新与重启后自动恢复。",
@@ -343,6 +347,8 @@ window.__ModuleLoader__.load({
 		};
 		const DICT_EN = {
 			"nav.label": "Interface Settings",
+			"quick.title": "Quick style",
+			"quick.enable": "Quick entry in session header",
 			"plugin.name": "Interface Settings (GUICustomization)",
 			"plugin.desc": "Nous Blue default palette, presets and 13 custom colors, ambient glow (halo/breathing/position), background image. Configure under Settings → Interface Settings.",
 			"group.presets": "Preset palettes",
@@ -395,6 +401,8 @@ window.__ModuleLoader__.load({
 			"bg.video.status": "Video background",
 			"bg.video.choose": "Choose video file…",
 			"bg.video.clear": "Remove video",
+			"bg.quickOn": "Enable background",
+			"bg.quickOff": "Disable background",
 			"bg.sidebarTransparent": "Transparent sidebar (shows backdrop when background is on)",
 			"bg.opacity": "Background opacity",
 			"bg.note": "When enabled the conversation area shows the image (base surface drops to 30% opacity), cards and sidebar stay slightly translucent, and the scrim adapts to light/dark. Image data is kept in browser IndexedDB and restored across refreshes and restarts.",
@@ -483,6 +491,11 @@ window.__ModuleLoader__.load({
   .guic-plugin-card { padding: 12px 14px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 10px; background: var(--dsw-alias-bg-layer-1); }
   .guic-plugin-name { font-size: 13px; font-weight: 600; color: var(--dsw-alias-label-primary); }
   .guic-plugin-desc { margin-top: 4px; font-size: 12px; color: var(--dsw-alias-label-secondary); line-height: 1.6; }
+
+  /* 会话头部快捷入口 */
+  .guic-icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; border: 1px solid var(--dsw-alias-border-l1); border-radius: 8px; background: var(--dsw-alias-bg-layer-1); color: var(--dsw-alias-label-primary); cursor: pointer; }
+  .guic-icon-btn:hover { border-color: var(--dsw-alias-brand-primary); }
+  .guic-quick-panel { position: absolute; right: 0; top: calc(100% + 6px); z-index: 40; min-width: 190px; display: flex; flex-direction: column; gap: 10px; padding: 12px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 10px; background: var(--dsw-alias-bg-overlay); box-shadow: 0 10px 30px rgba(0, 10, 40, 0.25); }
 `;
 		function apply(ctx) {
 			const theme = ctx.get("theme");
@@ -537,6 +550,12 @@ window.__ModuleLoader__.load({
 			const sidebarTransparentListeners = [];
 			let bgOpacity = .3;
 			const bgOpacityListeners = [];
+			let quickEntryEnabled = true;
+			const quickEntryListeners = [];
+			function setQuickEntryEnabled(value) {
+				quickEntryEnabled = value;
+				quickEntryListeners.slice().forEach((fn) => fn(value));
+			}
 			function setBg(enabled) {
 				bgEnabled = enabled;
 				bgListeners.slice().forEach((fn) => fn(enabled));
@@ -664,7 +683,8 @@ window.__ModuleLoader__.load({
 					ambient: ambientState,
 					bgKind,
 					bgSidebarTransparent,
-					bgOpacity
+					bgOpacity,
+					quickEntryEnabled
 				});
 			}
 			let bgBlobUrl = null;
@@ -759,6 +779,7 @@ window.__ModuleLoader__.load({
 			if (saved !== null && (saved.bgKind === "video" || saved.bgKind === "image")) setBgKind(saved.bgKind);
 			if (saved !== null && saved.bgSidebarTransparent === true) setBgSidebarTransparent(true);
 			if (saved !== null && typeof saved.bgOpacity === "number") setBgOpacity(saved.bgOpacity);
+			if (saved !== null && saved.quickEntryEnabled === false) setQuickEntryEnabled(false);
 			loadBackground().then((bg) => {
 				if (bg !== null && !userTouched && bgKind === "image") applyBackgroundData(bg);
 			});
@@ -800,6 +821,7 @@ window.__ModuleLoader__.load({
 				const [bgOpacityUi, setBgOpacityUi] = (0, react.useState)(bgOpacity);
 				const [langTick, setLangTick] = (0, react.useState)(0);
 				const [ioText, setIoText] = (0, react.useState)("");
+				const [quickUi, setQuickUi] = (0, react.useState)(quickEntryEnabled);
 				(0, react.useEffect)(() => {
 					if (locale === void 0) return;
 					return locale.subscribe(() => setLangTick((x) => x + 1));
@@ -857,6 +879,14 @@ window.__ModuleLoader__.load({
 					return () => {
 						const i = bgOpacityListeners.indexOf(listener);
 						if (i >= 0) bgOpacityListeners.splice(i, 1);
+					};
+				}, []);
+				(0, react.useEffect)(() => {
+					const listener = (value) => setQuickUi(value);
+					quickEntryListeners.push(listener);
+					return () => {
+						const i = quickEntryListeners.indexOf(listener);
+						if (i >= 0) quickEntryListeners.splice(i, 1);
 					};
 				}, []);
 				const update = (key, value) => {
@@ -986,7 +1016,15 @@ window.__ModuleLoader__.load({
 					setActivePreset("");
 					setNotice(t("io.imported"));
 				};
-				return (0, react.createElement)("div", { className: "guic-panel" }, (0, react.createElement)("div", { className: "guic-h" }, t("group.presets")), (0, react.createElement)("div", { className: "guic-presets" }, PRESET_ORDER.map((key) => (0, react.createElement)("button", {
+				return (0, react.createElement)("div", { className: "guic-panel" }, (0, react.createElement)("div", { className: "guic-ambient-row" }, (0, react.createElement)("label", { className: "guic-check" }, (0, react.createElement)("input", {
+					type: "checkbox",
+					checked: quickUi,
+					onChange: (ev) => {
+						userTouched = true;
+						setQuickEntryEnabled(Boolean(ev.target.checked));
+						persist();
+					}
+				}), t("quick.enable"))), (0, react.createElement)("div", { className: "guic-h" }, t("group.presets")), (0, react.createElement)("div", { className: "guic-presets" }, PRESET_ORDER.map((key) => (0, react.createElement)("button", {
 					key,
 					className: activePreset === key ? "guic-preset guic-preset-active" : "guic-preset",
 					onClick: choosePreset(key)
@@ -1117,6 +1155,100 @@ window.__ModuleLoader__.load({
 			function PluginCard() {
 				return (0, react.createElement)("div", { className: "guic-plugin-card" }, (0, react.createElement)("div", { className: "guic-plugin-name" }, t("plugin.name")), (0, react.createElement)("div", { className: "guic-plugin-desc" }, t("plugin.desc")));
 			}
+			const QUICK_ICON_SVG = "<svg viewBox=\"0 0 16 16\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M8 2.5a5.5 5.5 0 1 1 0 11a5.5 5.5 0 0 1 0-11z\"/><circle cx=\"5.95\" cy=\"5.95\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"10.05\" cy=\"5.95\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"5.95\" cy=\"10.05\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"10.05\" cy=\"10.05\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/></svg>";
+			function quickApplyPreset(key) {
+				userTouched = true;
+				if (key === "default") {
+					if (activeLayer !== null) {
+						activeLayer();
+						activeLayer = null;
+					}
+					setAmbient({ ...DEFAULT_AMBIENT });
+					clearBackground();
+					clearVideoBackground();
+					clearSettings();
+					return;
+				}
+				const p = PALETTES[key];
+				if (p === void 0) return;
+				applyColors(p.light, p.brandDark);
+				persist();
+			}
+			function QuickEntry() {
+				const [enabled, setEnabled] = (0, react.useState)(quickEntryEnabled);
+				const [open, setOpen] = (0, react.useState)(false);
+				const [bgState, setBgState] = (0, react.useState)(bgEnabled);
+				let rootEl = null;
+				(0, react.useEffect)(() => {
+					const listener = (value) => setEnabled(value);
+					quickEntryListeners.push(listener);
+					return () => {
+						const i = quickEntryListeners.indexOf(listener);
+						if (i >= 0) quickEntryListeners.splice(i, 1);
+					};
+				}, []);
+				(0, react.useEffect)(() => {
+					const listener = (value) => setBgState(value);
+					bgListeners.push(listener);
+					return () => {
+						const i = bgListeners.indexOf(listener);
+						if (i >= 0) bgListeners.splice(i, 1);
+					};
+				}, []);
+				(0, react.useEffect)(() => {
+					if (!open) return;
+					const onDown = (ev) => {
+						if (rootEl !== null && !rootEl.contains(ev.target)) setOpen(false);
+					};
+					document.addEventListener("mousedown", onDown);
+					return () => document.removeEventListener("mousedown", onDown);
+				}, [open]);
+				if (!enabled) return null;
+				const toggleBg = () => {
+					userTouched = true;
+					setOpen(false);
+					if (bgEnabled) {
+						if (bgKind === "video") clearVideoBackground();
+						else clearBackground();
+						persist();
+					} else if (bgKind === "video") loadVideo().then((v) => {
+						if (v !== null) {
+							applyVideoData(v);
+							persist();
+						}
+					});
+					else loadBackground().then((b) => {
+						if (b !== null) {
+							applyBackgroundData(b);
+							persist();
+						}
+					});
+				};
+				return (0, react.createElement)("div", {
+					ref: (el) => {
+						rootEl = el;
+					},
+					style: {
+						position: "relative",
+						display: "inline-flex"
+					}
+				}, (0, react.createElement)("button", {
+					className: "guic-icon-btn",
+					title: t("quick.title"),
+					"aria-label": t("quick.title"),
+					onClick: () => setOpen((o) => !o)
+				}, (0, react.createElement)("span", { dangerouslySetInnerHTML: { __html: QUICK_ICON_SVG } })), open ? (0, react.createElement)("div", { className: "guic-quick-panel" }, (0, react.createElement)("div", { className: "guic-h" }, t("group.presets")), (0, react.createElement)("div", { className: "guic-presets" }, PRESET_ORDER.map((key) => (0, react.createElement)("button", {
+					key,
+					className: "guic-preset",
+					onClick: () => {
+						setOpen(false);
+						quickApplyPreset(key);
+					}
+				}, t("preset." + key)))), (0, react.createElement)("button", {
+					className: bgState ? "guic-btn" : "guic-btn guic-btn-primary",
+					onClick: toggleBg
+				}, bgState ? t("bg.quickOff") : t("bg.quickOn"))) : null);
+			}
 			const NAV_ICON_SVG = "<svg viewBox=\"0 0 16 16\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"2.2\" y=\"3.2\" width=\"11.6\" height=\"9.6\" rx=\"1.8\"/><path d=\"M5 6.7l1.8 1.8-1.8 1.8\"/><path d=\"M9 10.3h2.6\"/></svg>";
 			function enhanceNavIcon() {
 				if (document.querySelector("[data-guic-nav-icon=\"1\"]") !== null) return;
@@ -1166,6 +1298,12 @@ window.__ModuleLoader__.load({
 				order: 30,
 				label: () => t("nav.label")
 			}, () => (0, react.createElement)(PluginCard)));
+			slots.inject("conversation.session.header.actions", () => slots.register({
+				name: "conversation.session.header.actions",
+				id: "guic-quick",
+				order: 30,
+				label: () => t("quick.title")
+			}, () => (0, react.createElement)(QuickEntry)));
 		}
 		//#endregion
 		exports.apply = apply;
