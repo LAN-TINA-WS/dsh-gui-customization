@@ -15,6 +15,9 @@ export const DICT_ZH: Record<string, string> = {
   'preset.emerald': '翡翠绿',
 
   'group.colors': '自定义颜色（应用后生效）',
+  'colors.mode': '编辑模式',
+  'colors.light': '亮色',
+  'colors.dark': '暗色',
   'field.bg-base': '背景',
   'field.label-primary': '文字',
   'field.layer-1': '卡片',
@@ -93,6 +96,9 @@ export const DICT_EN: Record<string, string> = {
   'preset.emerald': 'Emerald',
 
   'group.colors': 'Custom colors (applied on confirm)',
+  'colors.mode': 'Edit mode',
+  'colors.light': 'Light',
+  'colors.dark': 'Dark',
   'field.bg-base': 'Background',
   'field.label-primary': 'Text',
   'field.layer-1': 'Cards',

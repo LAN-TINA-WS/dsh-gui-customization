@@ -281,6 +281,9 @@ window.__ModuleLoader__.load({
 			"preset.indigo": "靛紫",
 			"preset.emerald": "翡翠绿",
 			"group.colors": "自定义颜色（应用后生效）",
+			"colors.mode": "编辑模式",
+			"colors.light": "亮色",
+			"colors.dark": "暗色",
 			"field.bg-base": "背景",
 			"field.label-primary": "文字",
 			"field.layer-1": "卡片",
@@ -351,6 +354,9 @@ window.__ModuleLoader__.load({
 			"preset.indigo": "Indigo",
 			"preset.emerald": "Emerald",
 			"group.colors": "Custom colors (applied on confirm)",
+			"colors.mode": "Edit mode",
+			"colors.light": "Light",
+			"colors.dark": "Dark",
 			"field.bg-base": "Background",
 			"field.label-primary": "Text",
 			"field.layer-1": "Cards",
@@ -514,6 +520,10 @@ window.__ModuleLoader__.load({
 			let activeLayer = null;
 			let currentColors = PALETTES.nous.light;
 			let currentBrandDark = PALETTES.nous.brandDark;
+			let currentDarkColors = {
+				...DARK,
+				"brand-primary": PALETTES.nous.brandDark
+			};
 			let userTouched = false;
 			let savedState = null;
 			const syncListeners = [];
@@ -617,7 +627,7 @@ window.__ModuleLoader__.load({
 			}
 			function buildTokens(light, brandDark, darkOverride) {
 				const dark = darkOverride ?? { ...DARK };
-				dark["brand-primary"] = brandDark;
+				if (darkOverride === void 0) dark["brand-primary"] = brandDark;
 				const tokens = {};
 				for (const key in TOKEN_KEYS) tokens[TOKEN_KEYS[key]] = {
 					light: light[key] ?? "",
@@ -651,17 +661,19 @@ window.__ModuleLoader__.load({
 			}
 			function renderTheme() {
 				const light = bgEnabled ? translucent(currentColors) : currentColors;
-				const dark = bgEnabled ? translucent({ ...DARK }) : void 0;
+				const dark = bgEnabled ? translucent(currentDarkColors) : currentDarkColors;
 				activeLayer = theme.overrideTokens(SOURCE, buildTokens(light, currentBrandDark, dark));
 			}
-			function applyColors(light, brandDark) {
+			function applyColors(light, dark, brandDark) {
 				currentColors = light;
+				currentDarkColors = dark;
 				currentBrandDark = brandDark;
 				renderTheme();
 			}
 			function persist() {
 				saveSettings({
 					colors: currentColors,
+					darkColors: currentDarkColors,
 					brandDark: currentBrandDark,
 					ambient: ambientState,
 					bgKind,
@@ -748,11 +760,22 @@ window.__ModuleLoader__.load({
 				deleteVideo();
 				if (bgKind === "video") renderTheme();
 			}
-			applyColors(PALETTES.nous.light, PALETTES.nous.brandDark);
+			applyColors(PALETTES.nous.light, {
+				...DARK,
+				"brand-primary": PALETTES.nous.brandDark
+			}, PALETTES.nous.brandDark);
 			const saved = loadSettings();
 			if (saved !== null && saved.colors !== void 0 && typeof saved.colors === "object") {
 				savedState = saved;
-				applyColors(saved.colors, saved.brandDark || PALETTES.nous.brandDark);
+				const savedBrand = saved.brandDark || PALETTES.nous.brandDark;
+				const savedDark = saved.darkColors !== void 0 && typeof saved.darkColors === "object" ? {
+					...DARK,
+					...saved.darkColors
+				} : {
+					...DARK,
+					"brand-primary": savedBrand
+				};
+				applyColors(saved.colors, savedDark, savedBrand);
 				if (saved.ambient !== void 0 && typeof saved.ambient === "object") setAmbient({
 					...DEFAULT_AMBIENT,
 					...saved.ambient
@@ -792,6 +815,11 @@ window.__ModuleLoader__.load({
 			}
 			function GuiPanel() {
 				const [colors, setColors] = (0, react.useState)(PALETTES.nous.light);
+				const [darkColors, setDarkColors] = (0, react.useState)({
+					...DARK,
+					"brand-primary": PALETTES.nous.brandDark
+				});
+				const [colorMode, setColorMode] = (0, react.useState)("light");
 				const [brandDark, setBrandDark] = (0, react.useState)(PALETTES.nous.brandDark);
 				const [activePreset, setActivePreset] = (0, react.useState)("nous");
 				const [notice, setNotice] = (0, react.useState)(t("notice.defaultApplied", { name: t("preset.nous") }));
@@ -810,6 +838,14 @@ window.__ModuleLoader__.load({
 					const sync = () => {
 						if (savedState === null || userTouched) return;
 						setColors(savedState.colors);
+						const sd = savedState.darkColors;
+						setDarkColors(sd !== void 0 && typeof sd === "object" ? {
+							...DARK,
+							...sd
+						} : {
+							...DARK,
+							"brand-primary": savedState.brandDark || PALETTES.nous.brandDark
+						});
 						setBrandDark(savedState.brandDark || PALETTES.nous.brandDark);
 						setActivePreset(null);
 						setNotice(t("notice.loaded"));
@@ -863,7 +899,11 @@ window.__ModuleLoader__.load({
 				}, []);
 				const update = (key, value) => {
 					userTouched = true;
-					setColors((prev) => ({
+					if (colorMode === "dark") setDarkColors((prev) => ({
+						...prev,
+						[key]: value
+					}));
+					else setColors((prev) => ({
 						...prev,
 						[key]: value
 					}));
@@ -927,23 +967,33 @@ window.__ModuleLoader__.load({
 						}
 						if (bgEnabled) {
 							const product = readProductTokens();
+							const productDark = {
+								...DARK,
+								"brand-primary": currentBrandDark
+							};
 							setColors(product);
-							applyColors(product, currentBrandDark);
+							setDarkColors(productDark);
+							applyColors(product, productDark, currentBrandDark);
 							setNotice(t("notice.bgReadback", { value: String(product["bg-base"] ?? "?") }));
 						} else setNotice(t("notice.systemDefault"));
 						return;
 					}
 					const p = PALETTES[key];
 					if (p === void 0) return;
+					const newDark = {
+						...DARK,
+						"brand-primary": p.brandDark
+					};
 					setColors(p.light);
+					setDarkColors(newDark);
 					setBrandDark(p.brandDark);
-					applyColors(p.light, p.brandDark);
+					applyColors(p.light, newDark, p.brandDark);
 					persist();
 					setNotice(t("notice.appliedPreset", { name: p.label }));
 				};
 				const applyCustom = () => {
 					userTouched = true;
-					applyColors(colors, brandDark);
+					applyColors(colors, darkColors, brandDark);
 					persist();
 					setActivePreset("");
 					setNotice(t("notice.customApplied"));
@@ -952,6 +1002,7 @@ window.__ModuleLoader__.load({
 					userTouched = true;
 					const text = JSON.stringify({
 						colors,
+						darkColors,
 						brandDark,
 						ambient: ambientState
 					}, null, 2);
@@ -975,15 +1026,22 @@ window.__ModuleLoader__.load({
 					const newColors = parsed.colors;
 					const merged = { ...colors };
 					for (const key in TOKEN_KEYS) if (typeof newColors[key] === "string" && newColors[key] !== "") merged[key] = newColors[key];
+					const newDarkRaw = parsed.darkColors;
+					const mergedDark = { ...darkColors };
+					if (newDarkRaw !== null && newDarkRaw !== void 0 && typeof newDarkRaw === "object") {
+						const newDark = newDarkRaw;
+						for (const key in TOKEN_KEYS) if (typeof newDark[key] === "string" && newDark[key] !== "") mergedDark[key] = newDark[key];
+					}
 					const newBrandDark = typeof parsed.brandDark === "string" && parsed.brandDark !== "" ? parsed.brandDark : brandDark;
 					const newAmbient = parsed.ambient !== null && typeof parsed.ambient === "object" ? {
 						...DEFAULT_AMBIENT,
 						...parsed.ambient
 					} : ambientState;
 					setColors(merged);
+					setDarkColors(mergedDark);
 					setBrandDark(newBrandDark);
 					setAmbient(newAmbient);
-					applyColors(merged, newBrandDark);
+					applyColors(merged, mergedDark, newBrandDark);
 					persist();
 					setActivePreset("");
 					setNotice(t("io.imported"));
@@ -992,8 +1050,12 @@ window.__ModuleLoader__.load({
 					key,
 					className: activePreset === key ? "guic-preset guic-preset-active" : "guic-preset",
 					onClick: choosePreset(key)
-				}, t("preset." + key)))), (0, react.createElement)("div", { className: "guic-h" }, t("group.colors")), (0, react.createElement)("div", { className: "guic-grid" }, FIELDS.map(([key, label]) => {
-					const value = colors[key] ?? "";
+				}, t("preset." + key)))), (0, react.createElement)("div", { className: "guic-ambient-row" }, (0, react.createElement)("span", { className: "guic-field-label" }, t("colors.mode")), ["light", "dark"].map((mode) => (0, react.createElement)("button", {
+					key: mode,
+					className: colorMode === mode ? "guic-preset guic-preset-active" : "guic-preset",
+					onClick: () => setColorMode(mode)
+				}, t("colors." + mode)))), (0, react.createElement)("div", { className: "guic-grid" }, FIELDS.map(([key, label]) => {
+					const value = (colorMode === "dark" ? darkColors : colors)[key] ?? "";
 					const hex = /^#[0-9a-fA-F]{6}$/.test(value) ? value : "#0053FD";
 					return (0, react.createElement)("div", {
 						className: "guic-field",
