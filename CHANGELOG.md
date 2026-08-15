@@ -3,6 +3,11 @@
 All notable changes to dsh-gui-customization are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/).
 
+## [0.6.0] - 2026-08-15
+
+### Added
+- Light/dark split editing: an independent 13-color palette for dark theme (Edit mode toggle in the custom-colors section). Presets reset the dark palette to their paired dark scheme; export/import/persistence now carry both palettes.
+
 ## [0.5.3] - 2026-08-15
 
 ### Fixed
