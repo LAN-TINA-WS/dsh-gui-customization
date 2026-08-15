@@ -2,6 +2,11 @@
 
 [中文](README.md) | English
 
+[![npm version](https://img.shields.io/npm/v/dsh-gui-customization)](https://www.npmjs.com/package/dsh-gui-customization)
+[![npm downloads](https://img.shields.io/npm/dw/dsh-gui-customization)](https://www.npmjs.com/package/dsh-gui-customization)
+[![GitHub stars](https://img.shields.io/github/stars/LAN-TINA-WS/dsh-gui-customization)](https://github.com/LAN-TINA-WS/dsh-gui-customization)
+[![license](https://img.shields.io/github/license/LAN-TINA-WS/dsh-gui-customization)](LICENSE)
+
 ![DeepSeek Harness Fashion Workshop · dsh-gui-customization](docs/screenshots/gui-customization-poster.jpg)
 
 ## dsh-gui-customization
