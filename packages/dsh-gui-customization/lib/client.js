@@ -98,8 +98,8 @@ window.__ModuleLoader__.load({
 					"warn": "#D9920B"
 				}
 			},
-			terracotta: {
-				label: "陶土橙",
+			sunset: {
+				label: "暖阳橙",
 				brandDark: "#E08E6D",
 				light: {
 					"bg-base": "#FAF9F5",
@@ -123,7 +123,7 @@ window.__ModuleLoader__.load({
 			"nous",
 			"indigo",
 			"emerald",
-			"terracotta"
+			"sunset"
 		];
 		const FIELDS = [
 			["bg-base", "背景"],
@@ -300,7 +300,7 @@ window.__ModuleLoader__.load({
 			"preset.nous": "Nous 蓝",
 			"preset.indigo": "靛紫",
 			"preset.emerald": "翡翠绿",
-			"preset.terracotta": "陶土橙",
+			"preset.sunset": "暖阳橙",
 			"group.colors": "自定义颜色（应用后生效）",
 			"colors.mode": "编辑模式",
 			"colors.light": "亮色",
@@ -374,7 +374,7 @@ window.__ModuleLoader__.load({
 			"preset.nous": "Nous Blue",
 			"preset.indigo": "Indigo",
 			"preset.emerald": "Emerald",
-			"preset.terracotta": "Terracotta",
+			"preset.sunset": "Warm Sunset",
 			"group.colors": "Custom colors (applied on confirm)",
 			"colors.mode": "Edit mode",
 			"colors.light": "Light",
