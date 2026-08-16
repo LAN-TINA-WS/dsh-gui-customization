@@ -448,7 +448,11 @@ window.__ModuleLoader__.load({
 		* - 插件配置区识别：注册 settings.plugin.item 卡片（设置 → 插件）
 		*/
 		const MAIN_CSS = `
-  .guic-panel { display: flex; flex-direction: column; gap: 14px; padding: 4px 0 16px; }
+  .guic-panel { display: flex; flex-direction: column; width: 100%; padding: 0 0 16px; }
+  /* 官方「通用设定」同款设定单元：16px 上下留白 + 发丝分割线；面板去掉最后一条的分割线 */
+  .guic-section-row { display: flex; flex-direction: column; gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--dsw-alias-border-l2); }
+  .guic-panel > .guic-section-row:last-child { border-bottom: none; }
+  .guic-section-title { font-size: 14px; font-weight: 400; line-height: 22px; color: var(--dsw-alias-label-primary); }
   .guic-h { font-size: 13px; font-weight: 600; color: var(--dsw-alias-label-secondary); }
   .guic-presets { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .guic-preset { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-layer-1); color: var(--dsw-alias-label-primary); cursor: pointer; font-size: 13px; }
@@ -1053,11 +1057,11 @@ window.__ModuleLoader__.load({
 					setPreset("");
 					setNotice(t("io.imported"));
 				};
-				return (0, react.createElement)("div", { className: "guic-panel" }, (0, react.createElement)("div", { className: "guic-h" }, t("group.presets")), (0, react.createElement)("div", { className: "guic-presets" }, PRESET_ORDER.map((key) => (0, react.createElement)("button", {
+				return (0, react.createElement)("div", { className: "guic-panel" }, (0, react.createElement)("div", { className: "guic-section-row" }, (0, react.createElement)("div", { className: "guic-section-title" }, t("group.presets")), (0, react.createElement)("div", { className: "guic-presets" }, PRESET_ORDER.map((key) => (0, react.createElement)("button", {
 					key,
 					className: activePreset === key ? "guic-preset guic-preset-active" : "guic-preset",
 					onClick: choosePreset(key)
-				}, t("preset." + key)))), (0, react.createElement)("div", { className: "guic-ambient-row" }, (0, react.createElement)("span", { className: "guic-field-label" }, t("colors.mode")), ["light", "dark"].map((mode) => (0, react.createElement)("button", {
+				}, t("preset." + key))))), (0, react.createElement)("div", { className: "guic-section-row" }, (0, react.createElement)("div", { className: "guic-section-title" }, t("group.colors")), (0, react.createElement)("div", { className: "guic-ambient-row" }, (0, react.createElement)("span", { className: "guic-field-label" }, t("colors.mode")), ["light", "dark"].map((mode) => (0, react.createElement)("button", {
 					key: mode,
 					className: colorMode === mode ? "guic-preset guic-preset-active" : "guic-preset",
 					onClick: () => setColorMode(mode)
@@ -1100,7 +1104,7 @@ window.__ModuleLoader__.load({
 						fontFamily: "monospace",
 						fontSize: "11px"
 					}
-				})), (0, react.createElement)("div", { className: "guic-h" }, t("group.ambient")), (0, react.createElement)("div", { className: "guic-ambient-row" }, (0, react.createElement)("button", {
+				}))), (0, react.createElement)("div", { className: "guic-section-row" }, (0, react.createElement)("div", { className: "guic-section-title" }, t("group.ambient")), (0, react.createElement)("div", { className: "guic-ambient-row" }, (0, react.createElement)("button", {
 					className: ambient.enabled ? "guic-btn guic-btn-primary" : "guic-btn",
 					onClick: () => updateAmbient({ enabled: !ambient.enabled })
 				}, ambient.enabled ? t("ambient.on") : t("ambient.off")), (0, react.createElement)("label", { className: "guic-check" }, (0, react.createElement)("input", {
@@ -1125,7 +1129,7 @@ window.__ModuleLoader__.load({
 					key,
 					className: ambient.position === key ? "guic-preset guic-preset-active" : "guic-preset",
 					onClick: () => updateAmbient({ position: key })
-				}, t("pos." + key)))), (0, react.createElement)("div", { className: "guic-h" }, t("group.bg")), (0, react.createElement)("div", { className: "guic-ambient-row" }, (0, react.createElement)("span", { className: "guic-field-label" }, t("bg.status")), (0, react.createElement)("span", { className: "guic-note" }, bg ? t("ambient.on") : t("ambient.off")), (0, react.createElement)("label", { className: "guic-btn guic-btn-primary" }, (0, react.createElement)("input", {
+				}, t("pos." + key))))), (0, react.createElement)("div", { className: "guic-section-row" }, (0, react.createElement)("div", { className: "guic-section-title" }, t("group.bg")), (0, react.createElement)("div", { className: "guic-ambient-row" }, (0, react.createElement)("span", { className: "guic-field-label" }, t("bg.status")), (0, react.createElement)("span", { className: "guic-note" }, bg ? t("ambient.on") : t("ambient.off")), (0, react.createElement)("label", { className: "guic-btn guic-btn-primary" }, (0, react.createElement)("input", {
 					type: "file",
 					accept: "image/*",
 					style: { display: "none" },
@@ -1183,7 +1187,7 @@ window.__ModuleLoader__.load({
 						setBgOpacity(Number(ev.target.value) / 100);
 						persist();
 					}
-				}), (0, react.createElement)("span", { className: "guic-note" }, `${Math.round(bgOpacityUi * 100)}%`)), (0, react.createElement)("div", { className: "guic-note" }, t("bg.note")), (0, react.createElement)("div", { className: "guic-notice" }, notice), (0, react.createElement)("div", { className: "guic-note" }, t("hint.persist")));
+				}), (0, react.createElement)("span", { className: "guic-note" }, `${Math.round(bgOpacityUi * 100)}%`)), (0, react.createElement)("div", { className: "guic-note" }, t("bg.note"))), (0, react.createElement)("div", { className: "guic-section-row" }, (0, react.createElement)("div", { className: "guic-notice" }, notice), (0, react.createElement)("div", { className: "guic-note" }, t("hint.persist"))));
 			}
 			function PluginCard() {
 				return (0, react.createElement)("div", { className: "guic-plugin-card" }, (0, react.createElement)("div", { className: "guic-plugin-name" }, t("plugin.name")), (0, react.createElement)("div", { className: "guic-plugin-desc" }, t("plugin.desc")));

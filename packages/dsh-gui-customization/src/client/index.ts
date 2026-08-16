@@ -38,7 +38,11 @@ interface LocaleService {
 }
 
 const MAIN_CSS = `
-  .guic-panel { display: flex; flex-direction: column; gap: 14px; padding: 4px 0 16px; }
+  .guic-panel { display: flex; flex-direction: column; width: 100%; padding: 0 0 16px; }
+  /* 官方「通用设定」同款设定单元：16px 上下留白 + 发丝分割线；面板去掉最后一条的分割线 */
+  .guic-section-row { display: flex; flex-direction: column; gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--dsw-alias-border-l2); }
+  .guic-panel > .guic-section-row:last-child { border-bottom: none; }
+  .guic-section-title { font-size: 14px; font-weight: 400; line-height: 22px; color: var(--dsw-alias-label-primary); }
   .guic-h { font-size: 13px; font-weight: 600; color: var(--dsw-alias-label-secondary); }
   .guic-presets { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .guic-preset { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-layer-1); color: var(--dsw-alias-label-primary); cursor: pointer; font-size: 13px; }
@@ -686,22 +690,26 @@ export function apply(ctx: Ctx) {
     }
 
     return createElement('div', { className: 'guic-panel' },
-      createElement('div', { className: 'guic-h' }, t('group.presets')),
-      createElement('div', { className: 'guic-presets' },
-        PRESET_ORDER.map((key) => createElement('button', {
-          key,
-          className: activePreset === key ? 'guic-preset guic-preset-active' : 'guic-preset',
-          onClick: choosePreset(key),
-        }, t('preset.' + key))),
+      createElement('div', { className: 'guic-section-row' },
+        createElement('div', { className: 'guic-section-title' }, t('group.presets')),
+        createElement('div', { className: 'guic-presets' },
+          PRESET_ORDER.map((key) => createElement('button', {
+            key,
+            className: activePreset === key ? 'guic-preset guic-preset-active' : 'guic-preset',
+            onClick: choosePreset(key),
+          }, t('preset.' + key))),
+        ),
       ),
-      createElement('div', { className: 'guic-ambient-row' },
-        createElement('span', { className: 'guic-field-label' }, t('colors.mode')),
-        (['light', 'dark'] as const).map((mode) => createElement('button', {
-          key: mode,
-          className: colorMode === mode ? 'guic-preset guic-preset-active' : 'guic-preset',
-          onClick: () => setColorMode(mode),
-        }, t('colors.' + mode))),
-      ),
+      createElement('div', { className: 'guic-section-row' },
+        createElement('div', { className: 'guic-section-title' }, t('group.colors')),
+        createElement('div', { className: 'guic-ambient-row' },
+          createElement('span', { className: 'guic-field-label' }, t('colors.mode')),
+          (['light', 'dark'] as const).map((mode) => createElement('button', {
+            key: mode,
+            className: colorMode === mode ? 'guic-preset guic-preset-active' : 'guic-preset',
+            onClick: () => setColorMode(mode),
+          }, t('colors.' + mode))),
+        ),
       createElement('div', { className: 'guic-grid' },
         FIELDS.map(([key, label]) => {
           const activePalette = colorMode === 'dark' ? darkColors : colors
@@ -739,12 +747,14 @@ export function apply(ctx: Ctx) {
           style: { width: '100%', minHeight: '64px', resize: 'vertical', fontFamily: 'monospace', fontSize: '11px' },
         }),
       ),
-      createElement('div', { className: 'guic-h' }, t('group.ambient')),
-      createElement('div', { className: 'guic-ambient-row' },
-        createElement('button', {
-          className: ambient.enabled ? 'guic-btn guic-btn-primary' : 'guic-btn',
-          onClick: () => updateAmbient({ enabled: !ambient.enabled }),
-        }, ambient.enabled ? t('ambient.on') : t('ambient.off')),
+      ),
+      createElement('div', { className: 'guic-section-row' },
+        createElement('div', { className: 'guic-section-title' }, t('group.ambient')),
+        createElement('div', { className: 'guic-ambient-row' },
+          createElement('button', {
+            className: ambient.enabled ? 'guic-btn guic-btn-primary' : 'guic-btn',
+            onClick: () => updateAmbient({ enabled: !ambient.enabled }),
+          }, ambient.enabled ? t('ambient.on') : t('ambient.off')),
         createElement('label', { className: 'guic-check' },
           createElement('input', {
             type: 'checkbox',
@@ -786,14 +796,16 @@ export function apply(ctx: Ctx) {
           onClick: () => updateAmbient({ position: key }),
         }, t('pos.' + key))),
       ),
-      createElement('div', { className: 'guic-h' }, t('group.bg')),
-      createElement('div', { className: 'guic-ambient-row' },
-        createElement('span', { className: 'guic-field-label' }, t('bg.status')),
-        createElement('span', { className: 'guic-note' }, bg ? t('ambient.on') : t('ambient.off')),
-        createElement('label', { className: 'guic-btn guic-btn-primary' },
-          createElement('input', {
-            type: 'file',
-            accept: 'image/*',
+      ),
+      createElement('div', { className: 'guic-section-row' },
+        createElement('div', { className: 'guic-section-title' }, t('group.bg')),
+        createElement('div', { className: 'guic-ambient-row' },
+          createElement('span', { className: 'guic-field-label' }, t('bg.status')),
+          createElement('span', { className: 'guic-note' }, bg ? t('ambient.on') : t('ambient.off')),
+          createElement('label', { className: 'guic-btn guic-btn-primary' },
+            createElement('input', {
+              type: 'file',
+              accept: 'image/*',
             style: { display: 'none' },
             onChange: (ev: any) => {
               const file = ev.target !== null && ev.target.files !== null && ev.target.files.length > 0 ? ev.target.files[0] : null
@@ -875,9 +887,12 @@ export function apply(ctx: Ctx) {
       createElement('div', { className: 'guic-note' },
         t('bg.note'),
       ),
-      createElement('div', { className: 'guic-notice' }, notice),
-      createElement('div', { className: 'guic-note' },
-        t('hint.persist'),
+      ),
+      createElement('div', { className: 'guic-section-row' },
+        createElement('div', { className: 'guic-notice' }, notice),
+        createElement('div', { className: 'guic-note' },
+          t('hint.persist'),
+        ),
       ),
     )
   }
