@@ -3,6 +3,11 @@
 All notable changes to dsh-gui-customization are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/).
 
+## [0.6.2] - 2026-08-15
+
+### Changed
+- Settings panel restyled to match the official General-page look: hairline dividers between sections (last divider removed), official 14px section titles.
+
 ## [0.6.1] - 2026-08-15
 
 ### Fixed
