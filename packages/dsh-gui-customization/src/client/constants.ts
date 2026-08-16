@@ -104,8 +104,8 @@ export const PALETTES: Record<string, Palette> = {
       'warn': '#D9920B',
     },
   },
-  claude: {
-    label: 'Claude 橙',
+  terracotta: {
+    label: '陶土橙',
     brandDark: '#E08E6D',
     light: {
       'bg-base': '#FAF9F5',
@@ -125,8 +125,8 @@ export const PALETTES: Record<string, Palette> = {
   },
 }
 
-export const PRESET_ORDER = ['default', 'nous', 'indigo', 'emerald', 'claude']
-export const PRESET_LABELS: Record<string, string> = { default: '系统默认', nous: 'Nous 蓝', indigo: '靛紫', emerald: '翡翠绿', claude: 'Claude 橙' }
+export const PRESET_ORDER = ['default', 'nous', 'indigo', 'emerald', 'terracotta']
+export const PRESET_LABELS: Record<string, string> = { default: '系统默认', nous: 'Nous 蓝', indigo: '靛紫', emerald: '翡翠绿', terracotta: '陶土橙' }
 
 // 自定义颜色字段（键 → 显示名）
 export const FIELDS: Array<[string, string]> = [

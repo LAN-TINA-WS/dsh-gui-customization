@@ -13,7 +13,7 @@ export const DICT_ZH: Record<string, string> = {
   'preset.nous': 'Nous 蓝',
   'preset.indigo': '靛紫',
   'preset.emerald': '翡翠绿',
-  'preset.claude': 'Claude 橙',
+  'preset.terracotta': '陶土橙',
 
   'group.colors': '自定义颜色（应用后生效）',
   'colors.mode': '编辑模式',
@@ -95,7 +95,7 @@ export const DICT_EN: Record<string, string> = {
   'preset.nous': 'Nous Blue',
   'preset.indigo': 'Indigo',
   'preset.emerald': 'Emerald',
-  'preset.claude': 'Claude Orange',
+  'preset.terracotta': 'Terracotta',
 
   'group.colors': 'Custom colors (applied on confirm)',
   'colors.mode': 'Edit mode',
