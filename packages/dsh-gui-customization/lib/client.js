@@ -97,13 +97,33 @@ window.__ModuleLoader__.load({
 					"success": "#0BA05E",
 					"warn": "#D9920B"
 				}
+			},
+			claude: {
+				label: "Claude 橙",
+				brandDark: "#E08E6D",
+				light: {
+					"bg-base": "#FAF9F5",
+					"label-primary": "#1F1E1D",
+					"layer-1": "#FFFFFF",
+					"brand-primary": "#D97757",
+					"layer-2": "#F5F1EA",
+					"border-l1": "rgba(217,119,87,0.22)",
+					"sidebar": "#F4F0E8",
+					"label-secondary": "#6E6A63",
+					"overlay": "#FFFFFF",
+					"border-l2": "rgba(217,119,87,0.45)",
+					"error": "#C25450",
+					"success": "#3D8C5A",
+					"warn": "#B7791F"
+				}
 			}
 		};
 		const PRESET_ORDER = [
 			"default",
 			"nous",
 			"indigo",
-			"emerald"
+			"emerald",
+			"claude"
 		];
 		const FIELDS = [
 			["bg-base", "背景"],
@@ -280,6 +300,7 @@ window.__ModuleLoader__.load({
 			"preset.nous": "Nous 蓝",
 			"preset.indigo": "靛紫",
 			"preset.emerald": "翡翠绿",
+			"preset.claude": "Claude 橙",
 			"group.colors": "自定义颜色（应用后生效）",
 			"colors.mode": "编辑模式",
 			"colors.light": "亮色",
@@ -353,6 +374,7 @@ window.__ModuleLoader__.load({
 			"preset.nous": "Nous Blue",
 			"preset.indigo": "Indigo",
 			"preset.emerald": "Emerald",
+			"preset.claude": "Claude Orange",
 			"group.colors": "Custom colors (applied on confirm)",
 			"colors.mode": "Edit mode",
 			"colors.light": "Light",
