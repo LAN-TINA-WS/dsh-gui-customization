@@ -79,6 +79,7 @@ dsh plugin --profile web add link:<仓库>/packages/dsh-gui-customization
 
 | 贡献者 | 贡献 |
 | --- | --- |
+| [LAN-TINA-WS](https://github.com/LAN-TINA-WS) | 项目作者与维护者 |
 | [QinYun165](https://github.com/QinYun165) | 大量 BUG 反馈 |
 | [FuturePioneer-3](https://github.com/FuturePioneer-3) | 深色主题背景图修复（[PR #2](https://github.com/LAN-TINA-WS/dsh-gui-customization/pull/2)） |
 

@@ -79,6 +79,7 @@ Bugs, feature requests, palette sharing: post to [issue #1 (Welcome Feedback)](h
 
 | Contributor | Contribution |
 | --- | --- |
+| [LAN-TINA-WS](https://github.com/LAN-TINA-WS) | Creator & maintainer |
 | [QinYun165](https://github.com/QinYun165) | Extensive bug feedback |
 | [FuturePioneer-3](https://github.com/FuturePioneer-3) | Dark-theme background fix ([PR #2](https://github.com/LAN-TINA-WS/dsh-gui-customization/pull/2)) |
 
