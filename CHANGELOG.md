@@ -3,6 +3,14 @@
 All notable changes to dsh-gui-customization are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/).
 
+## [0.6.3] - 2026-08-15
+
+### Added
+- Warm Sunset preset (暖阳橙): terracotta-orange palette with cream surfaces.
+
+### Fixed
+- Compatibility with newer DSH builds where `settings.plugin.item` became a keyed slot: registration now provides both `id` (list protocol) and `key` (keyed protocol), fixing "keyed slot requires options.key" load failures.
+
 ## [0.6.2] - 2026-08-15
 
 ### Changed

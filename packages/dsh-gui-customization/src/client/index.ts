@@ -944,7 +944,8 @@ export function apply(ctx: Ctx) {
     () => createElement(AmbientLayer),
   ))
   slots.inject('settings.plugin.item', () => slots.register(
-    { name: 'settings.plugin.item', id: 'gui-customization', order: 30, label: () => t('nav.label') },
+    // 同时提供 id（旧版 list 协议）与 key（新版 keyed 协议），兼容不同 DSH 版本
+    { name: 'settings.plugin.item', id: 'gui-customization', key: 'gui-customization', order: 30, label: () => t('nav.label') },
     () => createElement(PluginCard),
   ))
 }
