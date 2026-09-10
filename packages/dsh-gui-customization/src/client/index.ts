@@ -37,6 +37,21 @@ interface LocaleService {
   subscribe(fn: () => void): () => void
 }
 
+/**
+ * 客户端硬依赖声明（DSH 0.1.5+ 必须）。
+ *
+ * 新版 Web 客户端在 packages/client/web/src/boot.ts 里用 Promise.all 同时创建
+ * 全部客户端插件条目，谁先就绪谁先 apply。模块不声明 inject 时，cordis fiber
+ * 不会等待服务就位，apply 会在 theme / slots 被 provide 之前跑完，
+ * 于是 apply 顶部那句 `theme === undefined || slots === undefined → return`
+ * 会静默吞掉整个插件（样式、主题、设置入口、背景全无、且不报错）。
+ *
+ * 上游客户端插件一律在 ./client 模块顶层导出 inject（如 ui-theme 的
+ * `export const inject = ['slots', 'locale', 'remote', 'settingsScope']`），
+ * 让 fiber 挂起直至服务出现。这里保持同一约定。
+ */
+export const inject = ['theme', 'slots', 'locale']
+
 const MAIN_CSS = `
   .guic-panel { display: flex; flex-direction: column; width: 100%; padding: 0 0 16px; }
   /* 官方「通用设定」同款设定单元：16px 上下留白 + 发丝分割线；面板去掉最后一条的分割线 */
@@ -943,8 +958,17 @@ export function apply(ctx: Ctx) {
     { name: 'shell.overlay', id: 'guic-ambient', order: 0 },
     () => createElement(AmbientLayer),
   ))
+  // 「设置 → 插件 → 插件配置」卡片。
+  //
+  // 同时提供 id（旧版 list 协议）与 key（新版 keyed 协议）。
+  // 注意：新版该槽位是 keyed，且 ui-settings-plugins 的 tab 只分发
+  // 「Host 侧已注册设置命名空间」与卡片 key 的交集（见该包 tab-store.ts:
+  // `entry.options.key !== undefined && served.has(entry.options.key)`），
+  // 而本插件刻意不走 Host 持久化（设置存浏览器 localStorage/IndexedDB），
+  // Host 半边为空实现，因此这张卡片目前不会被分发渲染。
+  // 保留注册：一旦 Host 半边补上 `settings.register('gui-customization', …)`
+  // 命名空间，卡片即自动生效，无需改动客户端。
   slots.inject('settings.plugin.item', () => slots.register(
-    // 同时提供 id（旧版 list 协议）与 key（新版 keyed 协议），兼容不同 DSH 版本
     { name: 'settings.plugin.item', id: 'gui-customization', key: 'gui-customization', order: 30, label: () => t('nav.label') },
     () => createElement(PluginCard),
   ))

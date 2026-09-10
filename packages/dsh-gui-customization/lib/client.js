@@ -469,6 +469,24 @@ window.__ModuleLoader__.load({
 		*   （body[data-guic-bg] 属性选择器，scrim 用主题变量随明暗自适应）→ 主区真正透图
 		* - 插件配置区识别：注册 settings.plugin.item 卡片（设置 → 插件）
 		*/
+		/**
+		* 客户端硬依赖声明（DSH 0.1.5+ 必须）。
+		*
+		* 新版 Web 客户端在 packages/client/web/src/boot.ts 里用 Promise.all 同时创建
+		* 全部客户端插件条目，谁先就绪谁先 apply。模块不声明 inject 时，cordis fiber
+		* 不会等待服务就位，apply 会在 theme / slots 被 provide 之前跑完，
+		* 于是 apply 顶部那句 `theme === undefined || slots === undefined → return`
+		* 会静默吞掉整个插件（样式、主题、设置入口、背景全无、且不报错）。
+		*
+		* 上游客户端插件一律在 ./client 模块顶层导出 inject（如 ui-theme 的
+		* `export const inject = ['slots', 'locale', 'remote', 'settingsScope']`），
+		* 让 fiber 挂起直至服务出现。这里保持同一约定。
+		*/
+		const inject = [
+			"theme",
+			"slots",
+			"locale"
+		];
 		const MAIN_CSS = `
   .guic-panel { display: flex; flex-direction: column; width: 100%; padding: 0 0 16px; }
   /* 官方「通用设定」同款设定单元：16px 上下留白 + 发丝分割线；面板去掉最后一条的分割线 */
@@ -1267,6 +1285,7 @@ window.__ModuleLoader__.load({
 		}
 		//#endregion
 		exports.apply = apply;
+		exports.inject = inject;
 		return module.exports;
 	}
 });

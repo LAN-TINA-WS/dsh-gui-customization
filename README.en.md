@@ -29,7 +29,7 @@ A **theme customization plugin** for the DeepSeek Harness Web UI: default Nous B
 | Import / export | One-click palette JSON export (clipboard copy) and paste-to-apply import |
 | Bilingual | Chinese / English copy follows the DSH language setting instantly |
 | Persistence | localStorage + IndexedDB; fully restored after page refresh and DSH restart |
-| Production form | Composition plugin, survives restarts, listed under Settings → Plugins |
+| Production form | Composition plugin, survives restarts; configured under Settings → Interface Settings and listed under Settings → Plugins → Plugin list |
 
 ## Quick Install
 

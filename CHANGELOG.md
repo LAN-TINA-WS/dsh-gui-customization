@@ -3,6 +3,14 @@
 All notable changes to dsh-gui-customization are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/).
 
+## [0.6.4] - 2026-09-10
+
+### Fixed
+- **The plugin silently did nothing on DSH 0.1.0-rc.8 and newer.** The Web client now creates every client plugin entry concurrently (`Promise.all` in `packages/client/web/src/boot.ts`, first shipped in `dsh-v0.1.0-rc.8`), so a plugin whose module declares no `inject` can reach `apply()` before `ui-theme` and the slots provider have registered their services. The opening guard `if (theme === undefined || slots === undefined) return` then swallowed the whole plugin — no styles, no theme layer, no ambient overlay, no Settings row, and no error anywhere. The client module now exports `inject = ['theme', 'slots', 'locale']`, the same convention every upstream client plugin uses (e.g. `ui-theme`), so the cordis fiber stays pending until those services exist.
+
+### Changed
+- README no longer claims a card under Settings → Plugins. `settings.plugin.item` became a keyed slot dispatched by the tab only when the Host serves a matching settings namespace (`ui-settings-plugins/src/client/tab-store.ts`), and this plugin deliberately keeps its state in the browser (localStorage + IndexedDB) with an empty Host half, so that card is not dispatched. The plugin's configuration entry remains Settings → Interface Settings and it is listed under Settings → Plugins → Plugin list.
+
 ## [0.6.3] - 2026-08-15
 
 ### Added
