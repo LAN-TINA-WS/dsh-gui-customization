@@ -17,8 +17,6 @@ importers:
 
   packages/dsh-gui-customization: {}
 
-  packages/gui-customization: {}
-
 packages:
 
   '@oxc-project/types@0.144.0':
