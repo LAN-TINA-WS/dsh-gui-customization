@@ -242,7 +242,12 @@ export function apply(ctx: Ctx) {
     if (darkOverride === undefined) dark['brand-primary'] = brandDark
     const tokens: Record<string, { light: string; dark: string }> = {}
     for (const key in TOKEN_KEYS) {
-      tokens[TOKEN_KEYS[key]] = { light: light[key] ?? '', dark: dark[key] ?? '' }
+      const l = light[key] ?? ''
+      const d = dark[key] ?? ''
+      // 两侧都空 = 这个令牌没有值（老存档 / 新增字段未补全）。空串是非法 CSS 值，
+      // 会让浏览器丢掉该变量；直接跳过则保留主题自带的值，视觉上安全降级。
+      if (l === '' && d === '') continue
+      tokens[TOKEN_KEYS[key]] = { light: l, dark: d }
     }
     return tokens
   }
@@ -410,7 +415,11 @@ export function apply(ctx: Ctx) {
     const savedDark = (saved.darkColors !== undefined && typeof saved.darkColors === 'object')
       ? { ...DARK, ...(saved.darkColors as Record<string, string>) }
       : { ...DARK, 'brand-primary': savedBrand }
-    applyColors(saved.colors as Record<string, string>, savedDark, savedBrand)
+    // 存档补全：老档案只有当时存在的字段，新增令牌（如 idle）缺失时留空会写进
+    // 一个非法 CSS 值。用该存档所属预设的亮色板打底，用户自己的值仍然全部优先。
+    const savedPreset = typeof saved.activePreset === 'string' ? saved.activePreset : ''
+    const lightBase = (PALETTES[savedPreset] ?? PALETTES.nous).light
+    applyColors({ ...lightBase, ...(saved.colors as Record<string, string>) }, savedDark, savedBrand)
     if (saved.ambient !== undefined && typeof saved.ambient === 'object') {
       setAmbient({ ...DEFAULT_AMBIENT, ...(saved.ambient as Partial<AmbientState>) })
     }
@@ -958,16 +967,23 @@ export function apply(ctx: Ctx) {
     { name: 'shell.overlay', id: 'guic-ambient', order: 0 },
     () => createElement(AmbientLayer),
   ))
-  // 「设置 → 插件 → 插件配置」卡片。
+  // 「插件」页里的本插件卡片。
   //
-  // 同时提供 id（旧版 list 协议）与 key（新版 keyed 协议）。
-  // 注意：新版该槽位是 keyed，且 ui-settings-plugins 的 tab 只分发
-  // 「Host 侧已注册设置命名空间」与卡片 key 的交集（见该包 tab-store.ts:
-  // `entry.options.key !== undefined && served.has(entry.options.key)`），
-  // 而本插件刻意不走 Host 持久化（设置存浏览器 localStorage/IndexedDB），
-  // Host 半边为空实现，因此这张卡片目前不会被分发渲染。
-  // 保留注册：一旦 Host 半边补上 `settings.register('gui-customization', …)`
-  // 命名空间，卡片即自动生效，无需改动客户端。
+  // DSH 0.1.6-alpha.2 起，插件配置从「设置 → 插件」（settings.plugin.item，
+  // keyed，且只分发 Host 已注册设置命名空间与卡片 key 的交集）搬到了侧边栏
+  // 「插件」主面板，由 ui-plugin-manager 声明 plugins.item —— 普通 list 槽，
+  // 只按 id / order / label 投影，没有任何命名空间门控（见该包
+  // config-ledger.ts 的 `ctx.slots.entries('plugins.item')`）。
+  // 因此本插件无需 Host 侧 settings.register、无需额外依赖即可出现在插件页。
+  //
+  // 两条注册并存：注册进未声明的槽是彻底惰性的（inject 的回调不会触发），
+  // 所以 plugins.item 覆盖 0.1.6-alpha.2+，settings.plugin.item 留给更早的版本，
+  // 不存在同时命中的版本，不会重复出卡片。
+  slots.inject('plugins.item', () => slots.register(
+    { name: 'plugins.item', id: 'gui-customization', order: 30, label: () => t('nav.label') },
+    () => createElement(PluginCard),
+  ))
+  // 兼容 DSH ≤ 0.1.5：届时该槽位是 keyed，key 取设置命名空间。
   slots.inject('settings.plugin.item', () => slots.register(
     { name: 'settings.plugin.item', id: 'gui-customization', key: 'gui-customization', order: 30, label: () => t('nav.label') },
     () => createElement(PluginCard),

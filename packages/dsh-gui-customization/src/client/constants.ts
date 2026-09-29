@@ -20,6 +20,7 @@ export const TOKEN_KEYS: Record<string, string> = {
   'error': '--dsw-alias-state-error-primary',
   'success': '--dsw-alias-state-success-primary',
   'warn': '--dsw-alias-state-warn-primary',
+  'idle': '--dsw-alias-state-idle-primary',
 }
 
 // 暗色模式基础值（brand 随预设亮化）
@@ -37,6 +38,7 @@ export const DARK: Record<string, string> = {
   'error': '#FF8080',
   'success': '#62D68F',
   'warn': '#FFC978',
+  'idle': '#7C8496',
 }
 
 export interface Palette {
@@ -64,6 +66,7 @@ export const PALETTES: Record<string, Palette> = {
       'error': '#E5484D',
       'success': '#2E9E5B',
       'warn': '#D9920B',
+      'idle': '#8E94A3',
     },
   },
   indigo: {
@@ -83,6 +86,7 @@ export const PALETTES: Record<string, Palette> = {
       'error': '#E5484D',
       'success': '#2E9E5B',
       'warn': '#D9920B',
+      'idle': '#8B87A3',
     },
   },
   emerald: {
@@ -102,6 +106,7 @@ export const PALETTES: Record<string, Palette> = {
       'error': '#E5484D',
       'success': '#0BA05E',
       'warn': '#D9920B',
+      'idle': '#7E8C86',
     },
   },
   sunset: {
@@ -121,6 +126,7 @@ export const PALETTES: Record<string, Palette> = {
       'error': '#C25450',
       'success': '#3D8C5A',
       'warn': '#B7791F',
+      'idle': '#948C82',
     },
   },
 }
@@ -143,6 +149,7 @@ export const FIELDS: Array<[string, string]> = [
   ['error', '错误色'],
   ['success', '成功色'],
   ['warn', '警告色'],
+  ['idle', '非激活色'],
 ]
 
 // 氛围光默认值（strength 0..1；breatheAmp 0..1 呼吸幅度；position 光晕布局）

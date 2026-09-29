@@ -32,6 +32,7 @@ export const DICT_ZH: Record<string, string> = {
   'field.error': '错误色',
   'field.success': '成功色',
   'field.warn': '警告色',
+  'field.idle': '非激活色',
   'action.applyColors': '应用配色',
 
   'io.export': '导出',
@@ -114,6 +115,7 @@ export const DICT_EN: Record<string, string> = {
   'field.error': 'Error',
   'field.success': 'Success',
   'field.warn': 'Warning',
+  'field.idle': 'Inactive',
   'action.applyColors': 'Apply colors',
 
   'io.export': 'Export',

@@ -23,7 +23,8 @@ window.__ModuleLoader__.load({
 			"border-l2": "--dsw-alias-border-l2",
 			"error": "--dsw-alias-state-error-primary",
 			"success": "--dsw-alias-state-success-primary",
-			"warn": "--dsw-alias-state-warn-primary"
+			"warn": "--dsw-alias-state-warn-primary",
+			"idle": "--dsw-alias-state-idle-primary"
 		};
 		const DARK = {
 			"bg-base": "#0B0E17",
@@ -38,7 +39,8 @@ window.__ModuleLoader__.load({
 			"border-l2": "rgba(122,162,255,0.48)",
 			"error": "#FF8080",
 			"success": "#62D68F",
-			"warn": "#FFC978"
+			"warn": "#FFC978",
+			"idle": "#7C8496"
 		};
 		const PALETTES = {
 			nous: {
@@ -57,7 +59,8 @@ window.__ModuleLoader__.load({
 					"border-l2": "rgba(0,83,253,0.45)",
 					"error": "#E5484D",
 					"success": "#2E9E5B",
-					"warn": "#D9920B"
+					"warn": "#D9920B",
+					"idle": "#8E94A3"
 				}
 			},
 			indigo: {
@@ -76,7 +79,8 @@ window.__ModuleLoader__.load({
 					"border-l2": "rgba(110,86,207,0.45)",
 					"error": "#E5484D",
 					"success": "#2E9E5B",
-					"warn": "#D9920B"
+					"warn": "#D9920B",
+					"idle": "#8B87A3"
 				}
 			},
 			emerald: {
@@ -95,7 +99,8 @@ window.__ModuleLoader__.load({
 					"border-l2": "rgba(11,160,94,0.45)",
 					"error": "#E5484D",
 					"success": "#0BA05E",
-					"warn": "#D9920B"
+					"warn": "#D9920B",
+					"idle": "#7E8C86"
 				}
 			},
 			sunset: {
@@ -114,7 +119,8 @@ window.__ModuleLoader__.load({
 					"border-l2": "rgba(217,119,87,0.45)",
 					"error": "#C25450",
 					"success": "#3D8C5A",
-					"warn": "#B7791F"
+					"warn": "#B7791F",
+					"idle": "#948C82"
 				}
 			}
 		};
@@ -138,7 +144,8 @@ window.__ModuleLoader__.load({
 			["border-l2", "强边框"],
 			["error", "错误色"],
 			["success", "成功色"],
-			["warn", "警告色"]
+			["warn", "警告色"],
+			["idle", "非激活色"]
 		];
 		const DEFAULT_AMBIENT = {
 			enabled: true,
@@ -318,6 +325,7 @@ window.__ModuleLoader__.load({
 			"field.error": "错误色",
 			"field.success": "成功色",
 			"field.warn": "警告色",
+			"field.idle": "非激活色",
 			"action.applyColors": "应用配色",
 			"io.export": "导出",
 			"io.import": "导入",
@@ -392,6 +400,7 @@ window.__ModuleLoader__.load({
 			"field.error": "Error",
 			"field.success": "Success",
 			"field.warn": "Warning",
+			"field.idle": "Inactive",
 			"action.applyColors": "Apply colors",
 			"io.export": "Export",
 			"io.import": "Import",
@@ -674,10 +683,15 @@ window.__ModuleLoader__.load({
 				const dark = darkOverride ?? { ...DARK };
 				if (darkOverride === void 0) dark["brand-primary"] = brandDark;
 				const tokens = {};
-				for (const key in TOKEN_KEYS) tokens[TOKEN_KEYS[key]] = {
-					light: light[key] ?? "",
-					dark: dark[key] ?? ""
-				};
+				for (const key in TOKEN_KEYS) {
+					const l = light[key] ?? "";
+					const d = dark[key] ?? "";
+					if (l === "" && d === "") continue;
+					tokens[TOKEN_KEYS[key]] = {
+						light: l,
+						dark: d
+					};
+				}
 				return tokens;
 			}
 			function withAlpha(value, alpha) {
@@ -821,7 +835,12 @@ window.__ModuleLoader__.load({
 					...DARK,
 					"brand-primary": savedBrand
 				};
-				applyColors(saved.colors, savedDark, savedBrand);
+				const savedPreset = typeof saved.activePreset === "string" ? saved.activePreset : "";
+				const lightBase = (PALETTES[savedPreset] ?? PALETTES.nous).light;
+				applyColors({
+					...lightBase,
+					...saved.colors
+				}, savedDark, savedBrand);
 				if (saved.ambient !== void 0 && typeof saved.ambient === "object") setAmbient({
 					...DEFAULT_AMBIENT,
 					...saved.ambient
@@ -1275,6 +1294,12 @@ window.__ModuleLoader__.load({
 				id: "guic-ambient",
 				order: 0
 			}, () => (0, react.createElement)(AmbientLayer)));
+			slots.inject("plugins.item", () => slots.register({
+				name: "plugins.item",
+				id: "gui-customization",
+				order: 30,
+				label: () => t("nav.label")
+			}, () => (0, react.createElement)(PluginCard)));
 			slots.inject("settings.plugin.item", () => slots.register({
 				name: "settings.plugin.item",
 				id: "gui-customization",

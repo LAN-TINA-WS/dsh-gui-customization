@@ -3,6 +3,15 @@
 All notable changes to dsh-gui-customization are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/).
 
+## [0.6.5] - 2026-09-29
+
+### Added
+- Fourteenth colour field: **Inactive** (`--dsw-alias-state-idle-primary`), the token DSH added for inactive state colouring. Light values are tinted per preset (Nous `#8E94A3`, Indigo `#8B87A3`, Emerald `#7E8C86`, Sunset `#948C82`); dark shares `#7C8496`.
+
+### Fixed
+- **The plugin card never appeared on DSH 0.1.6-alpha.2 and newer.** That release moved plugin configuration out of Settings and onto the sidebar's Plugins panel (`feat(web): host plugin configuration on the Plugins page`), deleting `settings.plugin.item` and replacing it with `plugins.item`. The old registration therefore targeted a slot no DSH declares any more. The card is now registered into `plugins.item` (a plain list slot projected by `ui-plugin-manager`'s `config-ledger.ts`) and renders beside the shipped cards under the Official group. The legacy `settings.plugin.item` registration is kept for DSH ≤ 0.1.5, where the slot still exists; registering into an undeclared slot is inert, and no version declares both, so the card never doubles.
+- Saved palettes written before a colour field existed no longer produce an empty CSS value. `buildTokens` skips any token whose light and dark values are both empty (a bare `''` is not a valid CSS colour, and the browser drops the variable), and a restored palette is now merged over its own preset's light palette so newly added fields get a sensible default while the user's stored values still win everywhere.
+
 ## [0.6.4] - 2026-09-10
 
 ### Fixed
