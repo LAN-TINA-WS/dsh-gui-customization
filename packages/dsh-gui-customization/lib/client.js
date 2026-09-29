@@ -497,6 +497,13 @@ window.__ModuleLoader__.load({
 			"locale"
 		];
 		const MAIN_CSS = `
+  /* Windows 桌面端：ui-layout 的 [data-windows-titlebar] 规则把 .frame 的底色换成
+     侧边栏令牌、又给 .centerCol 补上 bg-base，主列因此比 Web 端多压一层
+     （Web 的 .centerCol 是 transparent，.frame 才是 bg-base），背景图明显更淡。
+     那里 .frame 只是容器——两列各自有底色——所以把它放空，主列的层叠就与 Web 一致。
+     class 名是 CSS Modules 的 "<hash>_<local>"，用后缀匹配；:has 已经在应用自身
+     CSS 里使用（.frame[data-panel-conversation]:has(...)），可放心依赖。 */
+  html[data-windows-titlebar] [class*="_frame"]:has([class*="_centerCol"]) { background: transparent !important; }
   .guic-panel { display: flex; flex-direction: column; width: 100%; padding: 0 0 16px; }
   /* 官方「通用设定」同款设定单元：16px 上下留白 + 发丝分割线；面板去掉最后一条的分割线 */
   .guic-section-row { display: flex; flex-direction: column; gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--dsw-alias-border-l2); }
