@@ -701,11 +701,17 @@ window.__ModuleLoader__.load({
 				if (rgb) return `rgba(${rgb[1]},${rgb[2]},${rgb[3]},${alpha})`;
 				return value;
 			}
+			function isWindowsDesktopFrame() {
+				return typeof document !== "undefined" && document.documentElement !== null && document.documentElement.hasAttribute("data-windows-titlebar");
+			}
 			function translucent(colors) {
 				const next = { ...colors };
 				for (const key in BG_FACE_ALPHA) if (key === "bg-base") next[key] = withAlpha(next[key] ?? "", bgOpacity);
-				else if (key === "sidebar") next[key] = bgSidebarTransparent ? withAlpha(next[key] ?? "", .55) : next[key] ?? "";
-				else next[key] = withAlpha(next[key] ?? "", BG_FACE_ALPHA[key]);
+				else if (key === "sidebar") {
+					if (bgSidebarTransparent) next[key] = withAlpha(next[key] ?? "", .55);
+					else if (isWindowsDesktopFrame()) next[key] = withAlpha(next[key] ?? "", .55);
+					else next[key] = next[key] ?? "";
+				} else next[key] = withAlpha(next[key] ?? "", BG_FACE_ALPHA[key]);
 				return next;
 			}
 			function readProductTokens() {

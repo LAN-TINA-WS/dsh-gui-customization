@@ -268,6 +268,14 @@ export function apply(ctx: Ctx) {
     return value
   }
 
+  // Windows 桌面端标记：apps/desktop 的 preload-windows.ts 会给 <html> 打上它，
+  // 随后 AppFrame 的 [data-windows-titlebar] .frame 规则改用侧边栏令牌当整块底板。
+  function isWindowsDesktopFrame(): boolean {
+    return typeof document !== 'undefined'
+      && document.documentElement !== null
+      && document.documentElement.hasAttribute('data-windows-titlebar')
+  }
+
   function translucent(colors: Record<string, string>): Record<string, string> {
     const next = { ...colors }
     for (const key in BG_FACE_ALPHA) {
@@ -275,8 +283,19 @@ export function apply(ctx: Ctx) {
         // 主区透明度由「背景透明度」滑块控制（10%–90%，默认 30%）
         next[key] = withAlpha(next[key] ?? '', bgOpacity)
       } else if (key === 'sidebar') {
-        // 侧边栏透明度由用户开关控制：透明 0.55 / 非透明保持原值
-        next[key] = bgSidebarTransparent ? withAlpha(next[key] ?? '', 0.55) : (next[key] ?? '')
+        // 用户开关：显式要求侧边栏透出背景（沿用既有 0.55）
+        if (bgSidebarTransparent) {
+          next[key] = withAlpha(next[key] ?? '', 0.55)
+        } else if (isWindowsDesktopFrame()) {
+          // Windows 桌面端把这个令牌当作整个应用框架的底板，而不是侧边栏：
+          //   :global([data-windows-titlebar]) .frame { background: var(--dsw-specific-sidebar-fill) }
+          // preload-windows.ts 给 html 打上该标记，于是 .frame 铺满整个窗口。
+          // 保持不透明时背景图在任何位置都透不出来 —— 桌面端「背景图」等于失效。
+          // Web 端没有该标记（框架用 --dsw-alias-bg-base），因此不受影响。
+          next[key] = withAlpha(next[key] ?? '', 0.55)
+        } else {
+          next[key] = next[key] ?? ''
+        }
       } else {
         next[key] = withAlpha(next[key] ?? '', BG_FACE_ALPHA[key])
       }
