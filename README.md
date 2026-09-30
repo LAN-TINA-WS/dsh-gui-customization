@@ -40,7 +40,7 @@ dsh plugin --profile web add github:LAN-TINA-WS/dsh-gui-customization#path:packa
 # 重启 dsh web，打开「设置 → 界面设定」开始配置
 ```
 
-**npm 安装（一条命令）**：
+**npm 安装（一条命令，版本可能滞后于最新 Release）**：
 
 ```sh
 dsh plugin --profile web add dsh-gui-customization
@@ -48,8 +48,8 @@ dsh plugin --profile web add dsh-gui-customization
 
 **Release ZIP 安装**：
 
-1. 从 [Releases](https://github.com/LAN-TINA-WS/dsh-gui-customization/releases/latest) 下载 `dsh-gui-customization-v*.zip` 并解压
-2. `dsh plugin --profile web add link:<解压目录>/dsh-gui-customization-v0.5.2`
+1. 从 [Releases](https://github.com/LAN-TINA-WS/dsh-gui-customization/releases/latest) 下载 `dsh-gui-customization-v*.zip` 并解压（压缩包顶层目录即 `dsh-gui-customization/`）
+2. `dsh plugin --profile web add link:<解压目录>/dsh-gui-customization`
 3. 重启 `dsh web`，打开「设置 → 界面设定」开始配置
 
 **从源码构建安装**（开发者）：

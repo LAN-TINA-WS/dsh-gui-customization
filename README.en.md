@@ -40,7 +40,7 @@ dsh plugin --profile web add github:LAN-TINA-WS/dsh-gui-customization#path:packa
 # restart dsh web, then open Settings → Interface Settings to configure
 ```
 
-**npm install (one command)**:
+**npm install (one command; the npm version may trail the latest Release)**:
 
 ```sh
 dsh plugin --profile web add dsh-gui-customization
@@ -48,8 +48,8 @@ dsh plugin --profile web add dsh-gui-customization
 
 **Release ZIP install**:
 
-1. Download `dsh-gui-customization-v*.zip` from [Releases](https://github.com/LAN-TINA-WS/dsh-gui-customization/releases/latest) and unzip it
-2. `dsh plugin --profile web add link:<unzip-dir>/dsh-gui-customization-v0.5.2`
+1. Download `dsh-gui-customization-v*.zip` from [Releases](https://github.com/LAN-TINA-WS/dsh-gui-customization/releases/latest) and unzip it (the archive's top-level directory is `dsh-gui-customization/`)
+2. `dsh plugin --profile web add link:<unzip-dir>/dsh-gui-customization`
 3. Restart `dsh web`, then open Settings → Interface Settings to configure
 
 **Build from source** (developers):
