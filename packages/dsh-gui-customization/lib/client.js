@@ -300,8 +300,7 @@ window.__ModuleLoader__.load({
 		*/
 		const DICT_ZH = {
 			"nav.label": "界面设定",
-			"plugin.name": "界面设定（GUICustomization）",
-			"plugin.desc": "Nous 蓝默认配色、预设与自定义 13 色、氛围光（光晕/呼吸/位置）、背景图。请在「设置 → 界面设定」中配置。",
+			"plugin.desc": "自定义界面配色、氛围光与背景图。",
 			"group.presets": "预设配色",
 			"preset.default": "系统默认",
 			"preset.nous": "Nous 蓝",
@@ -375,8 +374,7 @@ window.__ModuleLoader__.load({
 		};
 		const DICT_EN = {
 			"nav.label": "Interface Settings",
-			"plugin.name": "Interface Settings (GUICustomization)",
-			"plugin.desc": "Nous Blue default palette, presets and 13 custom colors, ambient glow (halo/breathing/position), background image. Configure under Settings → Interface Settings.",
+			"plugin.desc": "Customize interface colors, ambient glow, and background images.",
 			"group.presets": "Preset palettes",
 			"preset.default": "System default",
 			"preset.nous": "Nous Blue",
@@ -545,10 +543,6 @@ window.__ModuleLoader__.load({
   .guic-ambient-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .guic-check { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--dsw-alias-label-secondary); cursor: pointer; }
   .guic-range { flex: 1; min-width: 100px; accent-color: var(--dsw-alias-brand-primary); }
-
-  .guic-plugin-card { padding: 12px 14px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 10px; background: var(--dsw-alias-bg-layer-1); }
-  .guic-plugin-name { font-size: 13px; font-weight: 600; color: var(--dsw-alias-label-primary); }
-  .guic-plugin-desc { margin-top: 4px; font-size: 12px; color: var(--dsw-alias-label-secondary); line-height: 1.6; }
 
 `;
 		function apply(ctx) {
@@ -1261,8 +1255,9 @@ window.__ModuleLoader__.load({
 					}
 				}), (0, react.createElement)("span", { className: "guic-note" }, `${Math.round(bgOpacityUi * 100)}%`)), (0, react.createElement)("div", { className: "guic-note" }, t("bg.note"))), (0, react.createElement)("div", { className: "guic-section-row" }, (0, react.createElement)("div", { className: "guic-notice" }, notice), (0, react.createElement)("div", { className: "guic-note" }, t("hint.persist"))));
 			}
-			function PluginCard() {
-				return (0, react.createElement)("div", { className: "guic-plugin-card" }, (0, react.createElement)("div", { className: "guic-plugin-name" }, t("plugin.name")), (0, react.createElement)("div", { className: "guic-plugin-desc" }, t("plugin.desc")));
+			function PluginCard(props) {
+				if (props !== void 0 && props.view === "page") return (0, react.createElement)(GuiPanel);
+				return t("plugin.desc");
 			}
 			const NAV_ICON_SVG = "<svg viewBox=\"0 0 16 16\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"2.2\" y=\"3.2\" width=\"11.6\" height=\"9.6\" rx=\"1.8\"/><path d=\"M5 6.7l1.8 1.8-1.8 1.8\"/><path d=\"M9 10.3h2.6\"/></svg>";
 			function enhanceNavIcon() {
@@ -1312,14 +1307,14 @@ window.__ModuleLoader__.load({
 				id: "gui-customization",
 				order: 30,
 				label: () => t("nav.label")
-			}, () => (0, react.createElement)(PluginCard)));
+			}, PluginCard));
 			slots.inject("settings.plugin.item", () => slots.register({
 				name: "settings.plugin.item",
 				id: "gui-customization",
 				key: "gui-customization",
 				order: 30,
 				label: () => t("nav.label")
-			}, () => (0, react.createElement)(PluginCard)));
+			}, PluginCard));
 		}
 		//#endregion
 		exports.apply = apply;

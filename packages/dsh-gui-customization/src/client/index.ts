@@ -102,10 +102,6 @@ const MAIN_CSS = `
   .guic-check { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--dsw-alias-label-secondary); cursor: pointer; }
   .guic-range { flex: 1; min-width: 100px; accent-color: var(--dsw-alias-brand-primary); }
 
-  .guic-plugin-card { padding: 12px 14px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 10px; background: var(--dsw-alias-bg-layer-1); }
-  .guic-plugin-name { font-size: 13px; font-weight: 600; color: var(--dsw-alias-label-primary); }
-  .guic-plugin-desc { margin-top: 4px; font-size: 12px; color: var(--dsw-alias-label-secondary); line-height: 1.6; }
-
 `
 
 export function apply(ctx: Ctx) {
@@ -947,11 +943,13 @@ export function apply(ctx: Ctx) {
     )
   }
 
-  function PluginCard() {
-    return createElement('div', { className: 'guic-plugin-card' },
-      createElement('div', { className: 'guic-plugin-name' }, t('plugin.name')),
-      createElement('div', { className: 'guic-plugin-desc' }, t('plugin.desc')),
-    )
+  // 插件页（plugins.item）的卡片。契约见 ui-plugin-manager 的 slot-contract.ts：
+  //   view: 'summary' —— 只渲染「一句话简介」（文本或行内节点）；标题、图标与
+  //                     面包屑由插件页自己画，卡片不得复述标题。
+  //   view: 'page'    —— 渲染该插件自己页面的正文。
+  function PluginCard(props?: { view?: 'summary' | 'page' }) {
+    if (props !== undefined && props.view === 'page') return createElement(GuiPanel)
+    return t('plugin.desc')
   }
 
   // ---- 设置导航图标增强（插件框架内手术式方案：失效静默降级为齿轮）----
@@ -1005,13 +1003,16 @@ export function apply(ctx: Ctx) {
   // 两条注册并存：注册进未声明的槽是彻底惰性的（inject 的回调不会触发），
   // 所以 plugins.item 覆盖 0.1.6-alpha.2+，settings.plugin.item 留给更早的版本，
   // 不存在同时命中的版本，不会重复出卡片。
+  // 注册的是组件本身，不能包成 `() => createElement(PluginCard)` ——
+  // 那样插件页传下来的 owner props（view / form）会被箭头吃掉，
+  // 卡片永远拿不到 view，summary 与 page 就渲染成同一个东西。
   slots.inject('plugins.item', () => slots.register(
     { name: 'plugins.item', id: 'gui-customization', order: 30, label: () => t('nav.label') },
-    () => createElement(PluginCard),
+    PluginCard,
   ))
   // 兼容 DSH ≤ 0.1.5：届时该槽位是 keyed，key 取设置命名空间。
   slots.inject('settings.plugin.item', () => slots.register(
     { name: 'settings.plugin.item', id: 'gui-customization', key: 'gui-customization', order: 30, label: () => t('nav.label') },
-    () => createElement(PluginCard),
+    PluginCard,
   ))
 }

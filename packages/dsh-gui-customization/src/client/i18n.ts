@@ -5,8 +5,10 @@
 
 export const DICT_ZH: Record<string, string> = {
   'nav.label': '界面设定',
-  'plugin.name': '界面设定（GUICustomization）',
-  'plugin.desc': 'Nous 蓝默认配色、预设与自定义 13 色、氛围光（光晕/呼吸/位置）、背景图。请在「设置 → 界面设定」中配置。',
+  // 插件页列表行的一句话简介。标题由插件页画（slot 的 label），卡片在
+  // view === 'summary' 时只输出这一句 —— 与上游各卡片同一写法：
+  // 一句话、句号结尾、不复述标题、不写「请在 X 中配置」。
+  'plugin.desc': '自定义界面配色、氛围光与背景图。',
 
   'group.presets': '预设配色',
   'preset.default': '系统默认',
@@ -88,8 +90,7 @@ export const DICT_ZH: Record<string, string> = {
 
 export const DICT_EN: Record<string, string> = {
   'nav.label': 'Interface Settings',
-  'plugin.name': 'Interface Settings (GUICustomization)',
-  'plugin.desc': 'Nous Blue default palette, presets and 13 custom colors, ambient glow (halo/breathing/position), background image. Configure under Settings → Interface Settings.',
+  'plugin.desc': 'Customize interface colors, ambient glow, and background images.',
 
   'group.presets': 'Preset palettes',
   'preset.default': 'System default',
